@@ -1,0 +1,156 @@
+@startuml My Pokemon Gateway Architecture
+!theme plain
+
+package "客户端层" {
+    [Unity客户端] as Client #LightGreen
+    note right of Client #LightGreen
+      Unity客户端通信接口:
+      [[file:///my-pokemon/Client/PokemonClient.cs PokemonClient.cs]]
+      - TCP连接管理
+      - Protobuf消息处理
+      - 位置同步
+      - 对战请求
+    end note
+}
+
+package "网关服务器(C#)" {
+    package "启动模块" {
+        [启动类\nProgram.cs] as Program #LightGreen
+        note right of Program #LightGreen
+          启动配置:
+          - 加载appsettings.json
+          - 依赖注入服务
+          - 初始化TCP服务器
+          - 连接Showdown服务器
+        end note
+    }
+
+    package "网络层" {
+        [TCP服务器\nNettyTcpServer.cs] as TcpServer #Orange
+        [WebSocket客户端\nShowdownWebSocketClient.cs] as WsClient #Orange
+        
+        note right of TcpServer #Orange
+          TCP服务器实现:
+          - DotNetty服务器配置
+          - ChannelHandler链:
+            * ProtobufDecoder
+            * MessageHandler
+          - 会话管理:
+            * SessionManager.cs
+        end note
+        
+        note right of WsClient #Orange
+          Showdown通信实现:
+          - WebSocket连接
+          - 对战消息转换:
+            * ShowdownMessageConverter.cs
+        end note
+    }
+    
+    package "协议层" {
+        [Protobuf管理\nProtobufManager.cs] as ProtobufManager #Yellow
+        [消息路由\nMessageRouter.cs] as MessageRouter #Yellow
+        
+        note right of ProtobufManager #Yellow
+          Protobuf实现:
+          /Protos/:
+            - User.proto (用户相关)
+            - Map.proto (位置同步)
+            - Battle.proto (对战相关)
+          /Generated/:
+            - 生成的C#类
+        end note
+    }
+    
+    package "业务层" {
+        [用户服务\nUserService.cs] as UserManager #Pink
+        [地图服务\nMapService.cs] as MapManager #Pink
+        [对战服务\nBattleService.cs] as BattleManager #Pink
+        
+        note right of UserManager #Pink
+          用户模块实现:
+          /Models/:
+            - User.cs
+          /Services/:
+            - UserService.cs (登录注册)
+        end note
+        
+        note right of MapManager #Pink
+          地图模块实现:
+          /Models/:
+            - PlayerPosition.cs
+          /Services/:
+            - MapService.cs (位置同步)
+        end note
+        
+        note right of BattleManager #Pink
+          对战模块实现:
+          /Models/:
+            - Battle.cs
+          /Services/:
+            - BattleService.cs (对战管理)
+            - ShowdownService.cs (对战转发)
+        end note
+    }
+    
+    package "数据层" {
+        [数据访问\nRepository.cs] as Database #Blue
+        [缓存访问\nCacheManager.cs] as Cache #Blue
+        
+        note right of Database #Blue
+          数据库实现:
+          /Repositories/:
+            - UserRepository.cs
+          /Entities/:
+            - UserEntity.cs
+        end note
+        
+        note right of Cache #Blue
+          缓存实现:
+          /Cache/:
+            - RedisManager.cs (位置缓存)
+        end note
+    }
+}
+
+package "Pokemon Showdown" {
+    [开源服务器] as ShowdownServer #LightGreen
+    note right of ShowdownServer #LightGreen
+      对战服务器:
+      - 对战请求
+      - 状态更新
+      - 结果通知
+    end note
+}
+
+' 核心流程
+Client -down-> TcpServer : "1. TCP连接"
+TcpServer -down-> ProtobufManager : "2. 消息解码"
+ProtobufManager -down-> MessageRouter : "3. 消息路由"
+
+MessageRouter -right-> UserManager : "4a. 用户请求"
+MessageRouter -right-> MapManager : "4b. 位置同步"
+MessageRouter -right-> BattleManager : "4c. 对战请求"
+
+UserManager -down-> Database : "5a. 用户数据"
+MapManager -down-> Cache : "5b. 位置缓存"
+
+BattleManager -right-> WsClient : "6a. 对战请求"
+WsClient -right-> ShowdownServer : "6b. WebSocket"
+ShowdownServer -left-> WsClient : "7a. 对战响应"
+WsClient -left-> BattleManager : "7b. 结果处理"
+
+BattleManager -up-> TcpServer : "8. 推送对战状态"
+MapManager -up-> TcpServer : "9. 推送位置更新"
+TcpServer -up-> Client : "10. 返回客户端"
+
+legend right
+  |= 层级 |= 职责 |= 颜色 |
+  | 启动层 | 程序入口 | <back:#LightGreen>   绿色   </back> |
+  | 网络层 | 通信处理 | <back:#Orange>      橙色   </back> |
+  | 协议层 | 消息处理 | <back:#Yellow>      黄色   </back> |
+  | 业务层 | 业务逻辑 | <back:#Pink>        粉色   </back> |
+  | 数据层 | 数据存储 | <back:#Blue>        蓝色   </back> |
+endlegend
+
+@enduml 

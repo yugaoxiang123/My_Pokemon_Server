@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package Map;
+option csharp_namespace = "MyPokemon.Protocol";
+
+// 位置同步请求
+message PositionRequest {
+  float x = 1;  // X坐标
+  float y = 2; // Y坐标
+  int32 direction = 3;  // 朝向(0:上, 1:右, 2:下, 3:左)
+  string player_id = 4; // 玩家ID
+}
+
+// 位置广播消息
+message PositionBroadcast {
+  message PlayerPosition {
+    string player_id = 1;  // 玩家ID
+    float x = 2;          // X坐标  
+    float y = 3;          // Y坐标
+    int32 direction = 4;  // 朝向
+  }
+  repeated PlayerPosition positions = 1; // 所有玩家位置
+} 
