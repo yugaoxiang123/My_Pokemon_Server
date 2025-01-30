@@ -27,9 +27,13 @@ public class MessageRouter : ChannelHandlerAdapter
                 var session = _sessionManager.GetSession(context.Channel);
                 if (session != null)
                 {
-                    ServerLogger.LogPlayer($"messageRouter收到位置更新 - 玩家: {session.PlayerId}, 位置: ({positionRequest.X:F2}, {positionRequest.Y:F2}), 朝向: {positionRequest.Direction}");
+                    ServerLogger.LogPlayer($"收到位置更新 - 玩家: {session.PlayerId}, 位置: ({positionRequest.X:F2}, {positionRequest.Y:F2}), 朝向: {positionRequest.Direction}");
                     await _mapService.UpdatePosition(session.PlayerId, positionRequest.X, positionRequest.Y, positionRequest.Direction);
                 }
+            }
+            else if (message is GameMessage gameMessage)
+            {
+                // 处理其他类型的消息...
             }
         }
         catch (Exception e)

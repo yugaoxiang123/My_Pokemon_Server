@@ -1,3 +1,5 @@
+namespace MyPokemon.Models;
+
 public class PlayerPosition
 {
     public required string PlayerId { get; set; }
@@ -5,4 +7,4 @@ public class PlayerPosition
     public float Y { get; set; }
     public int Direction { get; set; }
     public DateTime LastUpdateTime { get; set; }
-} 
+}

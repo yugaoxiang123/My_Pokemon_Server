@@ -9,18 +9,51 @@ using DotNetty.Transport.Channels;
 using Google.Protobuf;
 using DotNetty.Common.Utilities;
 using MyPokemon.Utils;
+using MyPokemon.Protocol;
+using ProtoPosition = MyPokemon.Protocol.PlayerPosition;
 
 public class Session
 {
+    // 通信通道的上下文，可以为空。用于与客户端进行网络通信
     public IChannelHandlerContext? Channel { get; set; }
+    
+    // 玩家的唯一标识符，使用 required 关键字表示在创建对象时必须提供该值
     public required string PlayerId { get; set; }
+    
+    // 记录玩家最后活跃的时间，用于检测不活跃的会话
     public DateTime LastActiveTime { get; set; }
 
+    // 异步发送消息的方法
     public async Task SendAsync(IMessage message)
     {
         if (Channel != null && Channel.Channel.Active)
         {
-            await Channel.WriteAndFlushAsync(message);
+            var gameMessage = new GameMessage();
+            
+            switch (message)
+            {
+                case PlayerPosition pos:
+                    gameMessage.Type = MessageType.PositionUpdate;
+                    gameMessage.PositionUpdate = pos;
+                    break;
+                    
+                case PlayerJoinedMessage join:
+                    gameMessage.Type = MessageType.PlayerJoined;
+                    gameMessage.PlayerJoined = join;
+                    break;
+                    
+                case PlayerLeftMessage left:
+                    gameMessage.Type = MessageType.PlayerLeft;
+                    gameMessage.PlayerLeft = left;
+                    break;
+                    
+                case InitialPlayersMessage initial:
+                    gameMessage.Type = MessageType.InitialPlayers;
+                    gameMessage.InitialPlayers = initial;
+                    break;
+            }
+            
+            await Channel.WriteAndFlushAsync(gameMessage);
         }
     }
 }
@@ -33,8 +66,12 @@ public class SessionManager
     // 使用线程安全的字典存储会话
     private readonly ConcurrentDictionary<IChannel, Session> _sessions = new();
     
-    // 创建新会话
-    public Session CreateSession(IChannelHandlerContext context)
+    public SessionManager()
+    {
+    }
+    
+    // 创建新会话时通过参数传入 MapService
+    public async Task<Session> CreateSession(IChannelHandlerContext context, MapService mapService)
     {
         var session = new Session
         {
@@ -43,12 +80,67 @@ public class SessionManager
             LastActiveTime = DateTime.UtcNow
         };
 
-        // 将Session绑定到Channel
         context.Channel.GetAttribute(SessionKey).Set(session);
-        
-        // 添加到会话字典
         _sessions.TryAdd(context.Channel, session);
-        
+                
+        // 1. 先设置新玩家的初始位置
+        await mapService.UpdatePosition(session.PlayerId, 0, 0, 0);
+
+        // 2. 创建新玩家加入的消息
+        var joinMessage = new PlayerJoinedMessage 
+        { 
+            PlayerId = session.PlayerId,
+            X = 0,
+            Y = 0,
+            Direction = 0
+        };
+
+        // 3. 获取附近的玩家列表
+        var nearbyPlayers = await mapService.GetNearbyPlayers(0, 0, 15, session.PlayerId);
+        var initialMessage = new InitialPlayersMessage
+        {
+            Players = { } 
+        };
+
+        // 4. 处理附近的玩家
+        foreach(var player in nearbyPlayers)
+        {
+            initialMessage.Players.Add(new ProtoPosition
+            {
+                PlayerId = player.PlayerId,
+                X = player.X,
+                Y = player.Y,
+                Direction = player.Direction,
+                LastUpdateTime = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds()
+            });
+        }
+
+        try 
+        {
+            // 5. 只在有玩家时发送初始化消息
+            if (initialMessage.Players.Count > 0)
+            {
+                ServerLogger.LogPlayer($"发送初始化消息，玩家数量: {initialMessage.Players.Count}");
+                await session.SendAsync(initialMessage);
+            }
+            else
+            {
+                ServerLogger.LogPlayer("没有其他在线玩家，跳过发送初始化消息");
+            }
+
+            // 6. 广播新玩家加入消息
+            if (nearbyPlayers.Any())
+            {
+                ServerLogger.LogPlayer($"广播新玩家加入消息给 {nearbyPlayers.Count} 个玩家");
+                await BroadcastToPlayersAsync(joinMessage, nearbyPlayers.Select(p => p.PlayerId).ToList());
+            }
+        }
+        catch (Exception e)
+        {
+            ServerLogger.LogError($"创建会话时发送消息失败: {e.Message}");
+            throw;
+        }
+
         ServerLogger.LogPlayer($"创建新会话 - 玩家ID: {session.PlayerId}");
         return session;
     }
@@ -64,9 +156,16 @@ public class SessionManager
     }
 
     // 获取会话
+    // 方法定义：接受一个 IChannel 参数，返回类型是 Session?（可空的 Session）
     public Session? GetSession(IChannel channel)
     {
+        // 尝试从 _sessions 字典中获取与指定 channel 关联的 Session
+        // TryGetValue 是字典的一个方法，有两个参数：
+        // 1. channel: 要查找的键
+        // 2. out var session: 如果找到了，将值存储在 session 变量中
         _sessions.TryGetValue(channel, out var session);
+        
+        // 返回找到的 session（如果没找到则返回 null）
         return session;
     }
 

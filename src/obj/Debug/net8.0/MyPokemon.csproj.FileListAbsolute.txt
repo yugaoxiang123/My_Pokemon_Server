@@ -61,3 +61,4 @@ C:\Users\90953\Downloads\baokemeng\my-pokemon\src\obj\Debug\net8.0\refint\MyPoke
 C:\Users\90953\Downloads\baokemeng\my-pokemon\src\obj\Debug\net8.0\MyPokemon.pdb
 C:\Users\90953\Downloads\baokemeng\my-pokemon\src\obj\Debug\net8.0\MyPokemon.genruntimeconfig.cache
 C:\Users\90953\Downloads\baokemeng\my-pokemon\src\obj\Debug\net8.0\ref\MyPokemon.dll
+C:\Users\90953\Downloads\baokemeng\my-pokemon\src\obj\Debug\net8.0\MyPokemon.sourcelink.json

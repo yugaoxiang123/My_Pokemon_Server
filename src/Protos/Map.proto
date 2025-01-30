@@ -3,21 +3,53 @@ syntax = "proto3";
 package Map;
 option csharp_namespace = "MyPokemon.Protocol";
 
-// 位置同步请求
-message PositionRequest {
-  float x = 1;  // X坐标
-  float y = 2; // Y坐标
-  int32 direction = 3;  // 朝向(0:上, 1:右, 2:下, 3:左)
-  string player_id = 4; // 玩家ID
+// 消息类型枚举
+enum MessageType {
+    UNKNOWN = 0;
+    POSITION_UPDATE = 1;
+    PLAYER_JOINED = 2;
+    PLAYER_LEFT = 3;
+    INITIAL_PLAYERS = 4;
 }
 
-// 位置广播消息
-message PositionBroadcast {
-  message PlayerPosition {
-    string player_id = 1;  // 玩家ID
-    float x = 2;          // X坐标  
-    float y = 3;          // Y坐标
-    int32 direction = 4;  // 朝向
-  }
-  repeated PlayerPosition positions = 1; // 所有玩家位置
-} 
+// 通用消息包装
+message GameMessage {
+    MessageType type = 1;
+    oneof payload {
+        PlayerPosition position_update = 2;
+        PlayerJoinedMessage player_joined = 3;
+        PlayerLeftMessage player_left = 4;
+        InitialPlayersMessage initial_players = 5;
+    }
+}
+
+// 其他消息定义保持不变...
+message PlayerPosition {
+    string player_id = 1;
+    float x = 2;
+    float y = 3;
+    int32 direction = 4;
+    int64 last_update_time = 5;
+}
+
+message PlayerJoinedMessage {
+    string player_id = 1;
+    float x = 2;
+    float y = 3;
+    int32 direction = 4;
+}
+
+message PlayerLeftMessage {
+    string player_id = 1;
+}
+
+message InitialPlayersMessage {
+    repeated PlayerPosition players = 1;
+}
+
+message PositionRequest {
+    float x = 1;
+    float y = 2;
+    int32 direction = 3;
+    string player_id = 4;
+}
