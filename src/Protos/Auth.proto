@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package Auth;
+option csharp_namespace = "MyPokemon.Protocol";
+
+// 认证消息包装器
+message AuthMessage {
+    AuthMessageType type = 1;
+    oneof payload {
+        RegisterRequest register_request = 2;
+        RegisterResponse register_response = 3;
+        LoginRequest login_request = 4;
+        LoginResponse login_response = 5;
+        VerifyEmailRequest verify_request = 6;
+        VerifyEmailResponse verify_response = 7;
+    }
+}
+
+// 认证消息类型
+enum AuthMessageType {
+    UNKNOWN = 0;
+    REGISTER_REQUEST = 1;
+    REGISTER_RESPONSE = 2;
+    LOGIN_REQUEST = 3; 
+    LOGIN_RESPONSE = 4;
+    VERIFY_EMAIL_REQUEST = 5;
+    VERIFY_EMAIL_RESPONSE = 6;
+}
+
+// 注册请求
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+    string player_name = 3;
+}
+
+// 注册响应
+message RegisterResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 登录请求
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+// 登录响应 
+message LoginResponse {
+  bool success = 1;
+  string message = 2;
+  string token = 3;  // JWT token
+  string player_name = 4;  // 玩家名称
+  float position_x = 5;    // 位置X
+  float position_y = 6;    // 位置Y
+  int32 direction = 7;     // 朝向
+}
+
+// 邮箱验证请求
+message VerifyEmailRequest {
+  string email = 1;
+  string code = 2;
+}
+
+// 邮箱验证响应
+message VerifyEmailResponse {
+  bool success = 1;
+  string message = 2;
+} 

@@ -11,6 +11,9 @@ using DotNetty.Common.Utilities;
 using MyPokemon.Utils;
 using MyPokemon.Protocol;
 using ProtoPosition = MyPokemon.Protocol.PlayerPosition;
+using ModelPosition = MyPokemon.Models.PlayerPosition;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 public class Session
 {
@@ -23,16 +26,27 @@ public class Session
     // 记录玩家最后活跃的时间，用于检测不活跃的会话
     public DateTime LastActiveTime { get; set; }
 
+    // 添加认证相关属性
+    public bool IsAuthenticated { get; set; }
+    public string? UserEmail { get; set; }
+    public string? AuthToken { get; set; }
+
     // 异步发送消息的方法
     public async Task SendAsync(IMessage message)
     {
         if (Channel != null && Channel.Channel.Active)
         {
-            var gameMessage = new GameMessage();
+            if (message is PlayerPosition && !IsAuthenticated)
+            {
+                ServerLogger.LogError($"未认证的会话尝试发送位置更新: {PlayerId}");
+                return;
+            }
+
+            var gameMessage = new Message();
             
             switch (message)
             {
-                case PlayerPosition pos:
+                case ProtoPosition pos:
                     gameMessage.Type = MessageType.PositionUpdate;
                     gameMessage.PositionUpdate = pos;
                     break;
@@ -63,94 +77,93 @@ public class SessionManager
     // 用于从Channel获取Session的Key
     public static readonly AttributeKey<Session> SessionKey = AttributeKey<Session>.ValueOf("Session");
     
-    // 使用线程安全的字典存储会话
+    // 缓存键前缀
+    private const string POSITION_KEY = "position:";
+    
     private readonly ConcurrentDictionary<IChannel, Session> _sessions = new();
     
-    public SessionManager()
+    private readonly MapService _mapService;
+    private readonly DatabaseService _db;
+    private readonly IDistributedCache _cache;
+
+    public SessionManager(MapService mapService, DatabaseService db, IDistributedCache cache)
     {
+        _mapService = mapService;
+        _db = db;
+        _cache = cache;
     }
     
     // 创建新会话时通过参数传入 MapService
-    public async Task<Session> CreateSession(IChannelHandlerContext context, MapService mapService)
+    public Session CreateSession(IChannelHandlerContext context)
     {
         var session = new Session
         {
             Channel = context,
-            PlayerId = "Player_" + Guid.NewGuid().ToString("N").AsSpan(0, 8).ToString(),
-            LastActiveTime = DateTime.UtcNow
+            PlayerId = "未认证用户",  // 初始设置为未认证
+            LastActiveTime = DateTime.UtcNow,
+            IsAuthenticated = false
         };
 
         context.Channel.GetAttribute(SessionKey).Set(session);
         _sessions.TryAdd(context.Channel, session);
-                
-        // 1. 先设置新玩家的初始位置
-        await mapService.UpdatePosition(session.PlayerId, 0, 0, 0);
-
-        // 2. 创建新玩家加入的消息
-        var joinMessage = new PlayerJoinedMessage 
-        { 
-            PlayerId = session.PlayerId,
-            X = 0,
-            Y = 0,
-            Direction = 0
-        };
-
-        // 3. 获取附近的玩家列表
-        var nearbyPlayers = await mapService.GetNearbyPlayers(0, 0, 15, session.PlayerId);
-        var initialMessage = new InitialPlayersMessage
-        {
-            Players = { } 
-        };
-
-        // 4. 处理附近的玩家
-        foreach(var player in nearbyPlayers)
-        {
-            initialMessage.Players.Add(new ProtoPosition
-            {
-                PlayerId = player.PlayerId,
-                X = player.X,
-                Y = player.Y,
-                Direction = player.Direction,
-                LastUpdateTime = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds()
-            });
-        }
-
-        try 
-        {
-            // 5. 只在有玩家时发送初始化消息
-            if (initialMessage.Players.Count > 0)
-            {
-                ServerLogger.LogPlayer($"发送初始化消息，玩家数量: {initialMessage.Players.Count}");
-                await session.SendAsync(initialMessage);
-            }
-            else
-            {
-                ServerLogger.LogPlayer("没有其他在线玩家，跳过发送初始化消息");
-            }
-
-            // 6. 广播新玩家加入消息
-            if (nearbyPlayers.Any())
-            {
-                ServerLogger.LogPlayer($"广播新玩家加入消息给 {nearbyPlayers.Count} 个玩家");
-                await BroadcastToPlayersAsync(joinMessage, nearbyPlayers.Select(p => p.PlayerId).ToList());
-            }
-        }
-        catch (Exception e)
-        {
-            ServerLogger.LogError($"创建会话时发送消息失败: {e.Message}");
-            throw;
-        }
-
-        ServerLogger.LogPlayer($"创建新会话 - 玩家ID: {session.PlayerId}");
+        
+        ServerLogger.LogNetwork($"创建新会话: {session.PlayerId}");
         return session;
     }
 
+    // 添加认证成功后的处理方法
+    public async Task OnAuthenticationSuccess(Session session, string email, string token)
+    {
+        var user = await _db.GetUserByEmail(email);
+        if (user != null)
+        {
+            session.IsAuthenticated = true;
+            session.UserEmail = email;
+            session.AuthToken = token;
+            session.PlayerId = user.PlayerName;
+
+            // 恢复到上次的位置
+            float x = user.LastPositionX;
+            float y = user.LastPositionY;
+            int direction = user.LastDirection;
+            
+            // 设置位置
+            await _mapService.UpdatePosition(session.PlayerId, x, y, direction);
+
+            // 获取附近的玩家列表
+            var nearbyPlayers = await _mapService.GetNearbyPlayers(x, y, 15, session.PlayerId);
+            
+            // 发送初始化消息
+            if (nearbyPlayers.Any())
+            {
+                var initialMessage = new InitialPlayersMessage
+                {
+                    Players = { nearbyPlayers }
+                };
+                ServerLogger.LogNetwork($"发送初始化消息 - 玩家: {session.PlayerId}, 附近玩家: {string.Join(", ", nearbyPlayers.Select(p => p.PlayerId))}");
+                await session.SendAsync(initialMessage);
+                
+                // 广播新玩家加入消息
+                var joinMessage = new PlayerJoinedMessage 
+                { 
+                    PlayerId = session.PlayerId,
+                    X = x,
+                    Y = y,
+                    Direction = direction
+                };
+                await BroadcastToPlayersAsync(joinMessage, nearbyPlayers.Select(p => p.PlayerId).ToList());
+            }
+        }
+    }
+
     // 移除会话
-    public void RemoveSession(string playerId)
+    public async Task RemoveSession(string playerId)
     {
         var sessionToRemove = _sessions.FirstOrDefault(kvp => kvp.Value.PlayerId == playerId);
         if (sessionToRemove.Key != null && _sessions.TryRemove(sessionToRemove.Key, out var session))
         {
+            // 保存玩家最后位置
+            await SavePlayerPosition(playerId);
             ServerLogger.LogPlayer($"移除会话 - 玩家ID: {playerId}");
         }
     }
@@ -212,7 +225,7 @@ public class SessionManager
     }
 
     // 清理不活跃的会话
-    public void CleanupInactiveSessions(TimeSpan timeout)
+    public async Task CleanupInactiveSessions(TimeSpan timeout)
     {
         var now = DateTime.UtcNow;
         var inactivePlayers = _sessions.Values
@@ -222,7 +235,7 @@ public class SessionManager
 
         foreach (var playerId in inactivePlayers)
         {
-            RemoveSession(playerId);
+            await RemoveSession(playerId);
         }
     }
 
@@ -244,6 +257,29 @@ public class SessionManager
         catch (Exception e)
         {
             ServerLogger.LogError("广播消息时出错", e);
+        }
+    }
+
+    public async Task SavePlayerPosition(string playerId)
+    {
+        try
+        {
+            // 从Redis获取最后位置
+            var json = await _cache.GetStringAsync(POSITION_KEY + playerId);
+            if (json != null)
+            {
+                var position = JsonSerializer.Deserialize<ModelPosition>(json);
+                if (position != null)
+                {
+                    // 保存到数据库
+                    await _db.UpdateLastPosition(playerId, position.X, position.Y, position.Direction);
+                    ServerLogger.LogPlayer($"保存玩家离线位置成功 - ID: {playerId}");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            ServerLogger.LogError($"保存玩家位置失败: {e.Message}", e);
         }
     }
 } 

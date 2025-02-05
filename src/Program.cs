@@ -11,6 +11,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MyPokemon.Utils;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 public class Program
 {
@@ -83,14 +86,50 @@ public class Program
             return new RedisHealthCheck(cache);
         });
 
-        // 注册位置同步服务
-        services.AddSingleton<MapService>();
+        // 1. 首先注册基础服务
+        services.AddSingleton<DatabaseService>();
+        services.AddSingleton<EmailService>();
+        services.AddSingleton<AuthService>();
 
-        // 注册会话管理器
-        services.AddSingleton<SessionManager>();
-
-        // 注册TCP服务器
+        // 2. 然后创建和注册核心服务
+        var mapService = new MapService(
+            services.BuildServiceProvider().GetRequiredService<IDistributedCache>(),
+            context.Configuration
+        );
+        
+        var sessionManager = new SessionManager(
+            mapService,
+            services.BuildServiceProvider().GetRequiredService<DatabaseService>(),
+            services.BuildServiceProvider().GetRequiredService<IDistributedCache>()
+        );
+        
+        mapService.SetSessionManager(sessionManager);
+        
+        // 3. 注册到容器
+        services.AddSingleton(mapService);
+        services.AddSingleton(sessionManager);
         services.AddSingleton<NettyTcpServer>();
+
+        // 4. 最后配置认证
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = context.Configuration["Jwt:Issuer"],
+                    ValidAudience = context.Configuration["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(
+                            context.Configuration["Jwt:SecretKey"] ?? 
+                            throw new Exception("JWT密钥未配置")
+                        )
+                    )
+                };
+            });
     }
 
     // Redis健康检查服务

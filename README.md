@@ -1,7 +1,7 @@
 # Pokemon 多人在线项目说明文档
 
 ## 1. 项目概述
-这是一个基于.NET和Unity的多人在线Pokemon游戏项目。服务端使用DotNetty处理网络通信,Redis缓存数据,Protobuf进行消息序列化。
+这是一个基于.NET和Unity的多人在线Pokemon游戏项目。服务端使用DotNetty处理网络通信，PostgreSQL存储用户数据，Redis缓存游戏数据，Protobuf进行消息序列化，支持邮箱认证的用户系统。
 
 ## 2. 项目结构
 
@@ -10,148 +10,180 @@
 src/
 ├── Program.cs                # 程序入口,配置依赖注入和服务启动
 ├── MyPokemon.csproj         # 项目文件,管理NuGet包引用
-├── appsettings.json         # 配置文件,包含服务器端口和Redis连接
+├── appsettings.json         # 配置文件
 │
 ├── Network/                 # 网络层
-│   └── NettyTcpServer.cs    # TCP服务器,处理客户端连接和消息
+│   ├── NettyTcpServer.cs    # TCP服务器
+│   ├── MessageRouter.cs     # 消息路由
+│   └── AuthHandler.cs       # 认证中间件
 │
 ├── Services/                # 业务服务层
-│   ├── MapService.cs        # 位置同步服务,处理玩家位置更新和广播
-│   └── SessionManager.cs    # 会话管理,处理玩家连接状态
-│
-├── Protocol/               # 协议层
-│   ├── MessageRouter.cs     # 消息路由,分发消息到对应处理器
-│   └── Generated/          # Protobuf生成的C#代码
+│   ├── MapService.cs        # 位置同步服务
+│   ├── SessionManager.cs    # 会话管理
+│   ├── AuthService.cs       # 认证服务
+│   ├── EmailService.cs      # 邮件服务
+│   └── DatabaseService.cs   # 数据库服务
 │
 ├── Models/                 # 数据模型
-│   └── PlayerPosition.cs    # 玩家位置模型
+│   ├── PlayerPosition.cs    # 玩家位置模型
+│   └── User.cs             # 用户模型
 │
 └── Protos/                # 协议定义
-    └── Map.proto           # 位置同步相关消息定义
+    └── Protocol.proto      # 统一消息协议定义
 ```
 
-### 2.2 客户端 (my-pokemon/Client/)
-```
-Client/
-├── PokemonClient.cs        # Unity客户端主要逻辑
-└── NettyClient.cs          # 网络客户端,处理与服务器通信
-```
+## 3. 核心功能
 
-## 3. 核心文件说明
+### 3.1 消息系统
+- 统一的消息类型
+  - Auth相关消息 (1-100)
+    - 注册请求/响应
+    - 登录请求/响应
+    - 邮箱验证请求/响应
+  - Game相关消息 (101-200)
+    - 位置更新
+    - 玩家加入/离开
+    - 初始化玩家列表
 
-### 3.1 服务端文件
+### 3.2 位置同步系统
+- 实时位置更新
+  - 坐标(X,Y)
+  - 朝向(Direction)
+  - 时间戳
+- 范围广播机制
+  - 视野范围内广播
+  - 新玩家加入通知
+  - 玩家离开通知
+- Redis位置缓存
+- 断线重连处理
 
-#### Program.cs
-- 程序入口点
-- 配置依赖注入
-- 启动TCP服务器
-- 连接Redis缓存
-
-#### NettyTcpServer.cs
-- 基于DotNetty的TCP服务器
-- 处理客户端连接/断开
-- 配置Protobuf编解码器
-- 转发消息到MessageRouter
-
-#### SessionManager.cs
-- 管理所有客户端连接
-- 维护玩家ID和连接的映射
-- 处理玩家上线/下线
-- 提供广播功能
-
-#### MapService.cs
-- 处理位置同步逻辑
-- 使用Redis缓存位置数据
-- 向相关玩家广播位置更新
-
-#### MessageRouter.cs
-- 解析和分发消息到对应处理器
-- 维护消息类型和处理器的映射
-
-#### Map.proto
-- 定义位置同步相关的消息格式
-- 包含PositionRequest和PositionBroadcast
-
-### 3.2 客户端文件
-
-#### PokemonClient.cs
-- Unity客户端主要逻辑
-- 处理玩家输入
-- 更新其他玩家位置
-- 管理游戏对象
-
-#### NettyClient.cs
-- 处理与服务器的网络通信
-- 发送位置更新
-- 处理位置广播消息
-- 管理连接状态
-
-## 4. 关键配置文件
+## 4. 关键配置
 
 ### appsettings.json
 ```json
 {
   "Server": {
-    "Port": 5000          // 服务器监听端口
+    "Port": 5000,
+    "ViewDistance": 15
   },
   "Redis": {
-    "ConnectionString": "localhost:6379"  // Redis连接配置
+    "ConnectionString": "localhost:6379"
+  },
+  "Email": {
+    "SmtpHost": "smtp.qq.com",
+    "SmtpPort": 587,
+    "Username": "your-email@qq.com",
+    "Password": "your-smtp-password",
+    "FromAddress": "your-email@qq.com"
+  },
+  "Jwt": {
+    "SecretKey": "your-very-long-secret-key-at-least-32-bytes",
+    "Issuer": "pokemon-game",
+    "Audience": "pokemon-players",
+    "ExpiryDays": 7
+  },
+  "Database": {
+    "ConnectionString": "Host=localhost;Database=pokemon;Username=pokemon_user;Password=your_password"
   }
 }
 ```
 
-### MyPokemon.csproj
-- 定义项目依赖
-- 配置Protobuf生成
-- 管理项目设置
+## 5. 主要流程
 
-## 5. 主要功能流程
+### 5.1 用户认证流程
+1. 用户注册
+   - 发送 RegisterRequest 消息
+   - 检查邮箱是否已注册
+   - 创建用户记录到数据库
+   - 生成验证码并发送邮件
+2. 邮箱验证
+   - 发送 VerifyEmailRequest 消息
+   - 验证验证码有效性
+   - 更新数据库验证状态
+3. 用户登录
+   - 发送 LoginRequest 消息
+   - 验证密码正确性
+   - 检查邮箱验证状态
+   - 更新最后登录时间
+   - 生成并返回JWT令牌
+4. 游戏消息认证
+   - 请求携带JWT令牌
+   - AuthHandler验证令牌
+   - 未认证请求会被拒绝
 
-### 5.1 位置同步
-1. 客户端发送位置更新(PositionRequest)
-2. 服务器接收并更新Redis缓存
-3. MapService广播位置给其他玩家(PositionBroadcast)
-4. 其他客户端更新对应玩家位置
+### 5.2 游戏流程
+1. 认证成功后获取初始位置
+2. 接收附近玩家信息
+3. 定期发送位置更新（需要认证）
+4. 接收位置广播
+5. 断开时清理数据
 
-### 5.2 会话管理
-1. 客户端连接服务器
-2. SessionManager创建新会话
-3. 分配玩家ID
-4. 断开时清理会话数据
+## 6. 安全机制
 
-## 6. 扩展建议
+### 6.1 认证安全
+- 密码加密存储
+  - 使用SHA256加密
+  - 密码从不明文传输
+- JWT令牌验证
+  - 包含用户标识信息
+  - 签名防篡改
+  - 过期自动失效
+- 邮箱验证
+  - 验证码时效控制
+  - 防止重复发送
+  - 验证码长度保证
+- 会话状态检查
+  - 认证中间件拦截
+  - 会话状态维护
+  - 异常行为检测
 
-### 6.1 功能扩展
-- 添加玩家认证系统
-- 实现对战系统
-- 添加NPC和野生精灵
-- 实现物品系统
-- 添加聊天功能
+### 6.2 游戏安全
+- 位置合法性验证
+- 未认证限制
+- 消息频率限制
+- 异常行为检测
 
-### 6.2 技术改进
-- 添加日志系统
-- 实现负载均衡
-- 优化网络同步
-- 添加数据持久化
-- 实现热更新
-
-## 7. 调试信息
+## 7. 调试指南
 
 ### 7.1 服务端调试
-- 使用Visual Studio调试器
-- 查看Redis数据
-- 检查网络连接
-- 监控内存使用
+- 认证流程日志
+- Redis数据查看
+- JWT令牌验证
+- 会话状态检查
 
-### 7.2 客户端调试
-- Unity Profiler分析
-- 网络延迟监控
-- 内存泄漏检测
-- 帧率优化
+### 7.2 性能监控
+- 连接数监控
+- 消息吞吐量
+- Redis性能
+- 内存使用情况
 
-## 8. 注意事项
-1. 确保Redis服务运行
-2. 生成Protobuf代码
-3. 正确配置端口映射
-4. 定期清理Redis缓存
-5. 处理网络异常情况 
+## 8. 部署说明
+
+### 8.1 环境要求
+- .NET 8.0+
+- Redis 6.0+
+- PostgreSQL 14+
+- SMTP邮件服务
+- SSL证书（推荐）
+
+### 8.2 部署步骤
+1. 配置环境变量
+2. 初始化数据库
+3. 设置邮件服务
+4. 配置Redis连接
+5. 生成SSL证书
+6. 启动服务器
+
+## 9. 注意事项
+1. 定期清理过期会话
+2. 监控邮件发送限制
+3. 备份数据库数据
+4. 定期更新JWT密钥
+5. 处理并发连接
+6. 确保SMTP配置正确
+7. 监控验证码发送频率
+8. 处理认证失败重试
+9. 维护令牌黑名单
+10. 注意数据安全存储
+11. 定期数据库维护
+12. 监控连接池状态

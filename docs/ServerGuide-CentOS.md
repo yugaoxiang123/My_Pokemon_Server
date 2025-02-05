@@ -1,335 +1,215 @@
-# Pokemon 服务端启动指南 (CentOS)
+# Pokemon 服务器 Linux 部署指南
 
 ## 1. 环境准备
 
 ### 1.1 安装 .NET SDK
-1. 添加 Microsoft 包仓库：
 ```bash
-sudo rpm -Uvh https://packages.microsoft.com/config/centos/7/packages-microsoft-prod.rpm
-```
+# 添加 Microsoft 包仓库
+wget https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
 
-2. 安装 .NET SDK：
-```bash
-sudo yum install -y dotnet-sdk-8.0
-```
-
-3. 验证安装：
-```bash
-dotnet --version
+# 安装 SDK
+sudo apt-get update
+sudo apt-get install -y dotnet-sdk-8.0
 ```
 
 ### 1.2 安装 Redis
-1. 启用 EPEL 仓库：
 ```bash
-sudo yum install -y epel-release
-```
+# 安装 Redis
+sudo apt-get install redis-server
 
-2. 安装 Redis：
-```bash
-sudo yum install -y redis
-```
+# 启动 Redis 服务
+sudo systemctl start redis-server
+sudo systemctl enable redis-server
 
-3. 启动 Redis 服务：
-```bash
-sudo systemctl start redis
-```
-
-4. 设置开机自启：
-```bash
-sudo systemctl enable redis
-```
-
-5. 验证 Redis：
-```bash
+# 验证 Redis 运行状态
 redis-cli ping
-# 应返回 PONG
 ```
 
-### 1.3 安装 Protocol Buffers
-1. 安装依赖：
+### 1.3 安装 PostgreSQL
 ```bash
-sudo yum install -y gcc gcc-c++ make
+# 安装 PostgreSQL
+sudo apt-get install postgresql postgresql-contrib
+
+# 启动服务
+sudo systemctl start postgresql
+sudo systemctl enable postgresql
+
+# 切换到 postgres 用户
+sudo -i -u postgres
+
+# 创建数据库和用户
+psql
+CREATE DATABASE pokemon;
+CREATE USER pokemon_user WITH PASSWORD 'your_password';
+GRANT ALL PRIVILEGES ON DATABASE pokemon TO pokemon_user;
+\q
+
+# 配置远程访问（如需要）
+sudo nano /etc/postgresql/14/main/postgresql.conf
+# 修改 listen_addresses = '*'
+
+sudo nano /etc/postgresql/14/main/pg_hba.conf
+# 添加 host all all 0.0.0.0/0 md5
 ```
 
-2. 下载并安装 protobuf：
+## 2. 项目部署
+
+### 2.1 获取代码
 ```bash
-# 下载最新版本
-curl -LO https://github.com/protocolbuffers/protobuf/releases/download/v3.15.8/protoc-3.15.8-linux-x86_64.zip
+# 克隆项目
+git clone https://github.com/your-repo/pokemon-server.git
+cd pokemon-server
 
-# 安装 unzip（如果未安装）
-sudo yum install -y unzip
-
-# 解压到 /usr/local
-sudo unzip protoc-3.15.8-linux-x86_64.zip -d /usr/local
-
-# 设置权限
-sudo chmod 755 /usr/local/bin/protoc
+# 安装依赖
+dotnet restore
 ```
 
-3. 验证安装：
+### 2.2 配置文件
 ```bash
-protoc --version
-```
+# 创建并编辑配置文件
+cp appsettings.Example.json appsettings.json
+nano appsettings.json
 
-### 1.4 安装 VS Code (可选)
-1. 添加 VS Code 仓库：
-```bash
-# 导入微软的 GPG key
-sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
-
-# 添加 VS Code 仓库
-sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
-```
-
-2. 安装 VS Code：
-```bash
-# 更新包缓存
-sudo yum update -y
-
-# 安装 VS Code
-sudo yum install -y code
-```
-
-3. 安装必要扩展：
-```bash
-# C# 开发工具包
-code --install-extension ms-dotnettools.csdevkit
-
-# .NET 扩展包
-code --install-extension ms-dotnettools.vscode-dotnet-runtime
-
-# Protobuf 支持
-code --install-extension zxh404.vscode-proto3
-
-# C# 语言支持
-code --install-extension ms-dotnettools.csharp
-```
-
-4. 配置 VS Code：
-```bash
-# 创建用户配置目录
-mkdir -p ~/.config/Code/User/
-
-# 创建设置文件
-cat > ~/.config/Code/User/settings.json << EOF
+# 配置示例
 {
-    "files.autoSave": "afterDelay",
-    "editor.formatOnSave": true,
-    "omnisharp.enableRoslynAnalyzers": true,
-    "omnisharp.enableEditorConfigSupport": true
+  "Server": {
+    "Port": 5000,
+    "ViewDistance": 15
+  },
+  "Redis": {
+    "ConnectionString": "localhost:6379"
+  },
+  "Database": {
+    "ConnectionString": "Host=localhost;Database=pokemon;Username=pokemon_user;Password=your_password"
+  }
 }
-EOF
 ```
-### 1.4 安装 VS Code (仅开发环境，服务器无需安装)
-> 注意：VS Code 和扩展只需要在开发机器上安装，生产服务器不需要安装这部分内容。
 
-5. 验证安装：
+### 2.3 编译运行
 ```bash
-# 检查 VS Code 版本
-code --version
+# 发布项目
+dotnet publish -c Release
 
-# 列出已安装的扩展
-code --list-extensions
+# 运行服务器
+cd bin/Release/net8.0/publish
+dotnet MyPokemon.dll
 ```
 
-## 2. 系统配置
-
-### 2.1 防火墙配置
-1. 开放必要端口：
+### 2.4 使用 systemd 管理服务
 ```bash
-# 开放游戏服务器端口
-sudo firewall-cmd --permanent --add-port=5000/tcp
+# 创建服务文件
+sudo nano /etc/systemd/system/pokemon-server.service
 
-# 重新加载防火墙配置
-sudo firewall-cmd --reload
-```
-
-### 2.2 SELinux 配置
-1. 允许网络访问：
-```bash
-# 允许程序监听端口
-sudo setsebool -P httpd_can_network_connect 1
-```
-
-### 2.3 系统优化
-1. 调整系统限制：
-```bash
-sudo vi /etc/security/limits.conf
-
-# 添加以下内容
-* soft nofile 65535
-* hard nofile 65535
-```
-
-2. 调整内核参数：
-```bash
-sudo vi /etc/sysctl.conf
-
-# 添加以下内容
-net.core.somaxconn = 1024
-net.ipv4.tcp_max_syn_backlog = 1024
-net.ipv4.tcp_fin_timeout = 30
-net.ipv4.tcp_keepalive_time = 300
-```
-
-## 3. 服务配置
-
-### 3.1 创建服务用户
-```bash
-sudo useradd -r -s /sbin/nologin pokemon
-```
-
-### 3.2 创建应用目录
-```bash
-sudo mkdir -p /opt/pokemon
-sudo chown -R pokemon:pokemon /opt/pokemon
-```
-
-### 3.3 配置服务
-1. 创建服务文件：
-```bash
-sudo vi /etc/systemd/system/pokemon-server.service
-```
-
-2. 添加服务配置：
-```ini
 [Unit]
 Description=Pokemon Game Server
-After=network.target redis.service
+After=network.target postgresql.service redis-server.service
 
 [Service]
-User=pokemon
-WorkingDirectory=/opt/pokemon/src
-ExecStart=/usr/bin/dotnet run
+WorkingDirectory=/opt/pokemon-server
+ExecStart=/usr/bin/dotnet MyPokemon.dll
 Restart=always
 RestartSec=10
-LimitNOFILE=65535
+User=pokemon
+Environment=ASPNETCORE_ENVIRONMENT=Production
 
 [Install]
 WantedBy=multi-user.target
-```
-
-## 4. 部署应用
-
-### 4.1 复制应用文件
-```bash
-# 假设源代码在当前目录
-sudo cp -r * /opt/pokemon/
-sudo chown -R pokemon:pokemon /opt/pokemon
-```
-
-### 4.2 配置日志
-1. 创建日志目录：
-```bash
-sudo mkdir -p /var/log/pokemon
-sudo chown pokemon:pokemon /var/log/pokemon
-```
-
-2. 配置日志轮转：
-```bash
-sudo vi /etc/logrotate.d/pokemon
-
-# 添加以下内容
-/var/log/pokemon/*.log {
-    daily
-    rotate 7
-    compress
-    delaycompress
-    missingok
-    notifempty
-    create 644 pokemon pokemon
-}
-```
-
-## 5. 启动服务
-
-### 5.1 启动服务
-```bash
-# 重新加载 systemd
-sudo systemctl daemon-reload
 
 # 启动服务
-sudo systemctl start pokemon-server
-
-# 设置开机自启
 sudo systemctl enable pokemon-server
-```
-
-### 5.2 验证服务状态
-```bash
-# 检查服务状态
-sudo systemctl status pokemon-server
+sudo systemctl start pokemon-server
 
 # 查看日志
 sudo journalctl -u pokemon-server -f
-
-# 检查端口
-sudo netstat -tulpn | grep 5000
 ```
 
-## 6. 监控和维护
+## 3. 防火墙配置
 
-### 6.1 服务监控
 ```bash
-# 查看服务状态
-sudo systemctl status pokemon-server
+# 开放游戏服务器端口
+sudo ufw allow 5000/tcp
 
-# 查看内存使用
-ps -o pid,ppid,%mem,rss,cmd -p $(pgrep -f pokemon-server)
+# 如果需要开放 PostgreSQL 端口
+sudo ufw allow 5432/tcp
 
-# 查看CPU使用
-top -p $(pgrep -f pokemon-server)
+# 启用防火墙
+sudo ufw enable
 ```
 
-### 6.2 Redis 监控
-```bash
-# 查看Redis状态
-redis-cli info
+## 4. 监控和维护
 
-# 监控Redis命令
-redis-cli monitor
+### 4.1 日志查看
+```bash
+# 查看系统日志
+tail -f /var/log/syslog
+
+# 查看服务日志
+sudo journalctl -u pokemon-server -f
 ```
 
-## 7. 常见问题解决
-
-### 7.1 权限问题
+### 4.2 数据库备份
 ```bash
-# 检查SELinux状态
-sestatus
+# 备份数据库
+pg_dump -U pokemon_user pokemon > backup.sql
 
-# 如果遇到权限问题，可以临时关闭SELinux
-sudo setenforce 0
+# 还原数据库
+psql -U pokemon_user pokemon < backup.sql
 ```
 
-### 7.2 网络问题
+### 4.3 Redis 监控
 ```bash
-# 检查防火墙状态
-sudo systemctl status firewalld
+# 连接到 Redis
+redis-cli
 
-# 检查端口是否开放
-sudo firewall-cmd --list-ports
-
-# 测试端口连接
-telnet localhost 5000
+# 监控命令
+INFO
+MONITOR
 ```
 
-### 7.3 服务问题
-```bash
-# 重启服务
-sudo systemctl restart pokemon-server
+## 5. 常见问题处理
 
-# 查看详细日志
-sudo journalctl -u pokemon-server -f --since "1 hour ago"
-```
+### 5.1 服务无法启动
+- 检查日志: `sudo journalctl -u pokemon-server -f`
+- 检查端口占用: `sudo lsof -i :5000`
+- 检查权限: `ls -l /opt/pokemon-server`
 
-### 7.4 性能问题
-```bash
-# 查看系统负载
-uptime
+### 5.2 数据库连接问题
+- 检查 PostgreSQL 状态: `sudo systemctl status postgresql`
+- 检查连接字符串
+- 验证用户权限
 
-# 查看内存使用
-free -m
+### 5.3 Redis 连接问题
+- 检查 Redis 状态: `sudo systemctl status redis-server`
+- 检查连接配置
+- 验证内存使用情况
 
-# 查看磁盘使用
-df -h
-``` 
+# 添加执行权限
+chmod +x start-pokemon.sh
+
+#设置pm2开机自启
+# 生成开机自启脚本
+pm2 startup
+
+# 保存当前运行的应用列表，以便开机自启
+pm2 save
+
+#pm2常用管理命令
+# 查看应用状态
+pm2 status
+
+# 查看详细信息
+pm2 show pokemon-server
+
+# 重载应用
+pm2 reload pokemon-server
+
+# 删除应用
+pm2 delete pokemon-server
+
+# 清除日志
+pm2 flush
+
+# 查看资源使用
+pm2 monit

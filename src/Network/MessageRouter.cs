@@ -11,34 +11,110 @@ public class MessageRouter : ChannelHandlerAdapter
 {
     private readonly SessionManager _sessionManager;
     private readonly MapService _mapService;
+    private readonly AuthService _authService;
 
-    public MessageRouter(SessionManager sessionManager, MapService mapService)
+    public MessageRouter(SessionManager sessionManager, MapService mapService, AuthService authService)
     {
         _sessionManager = sessionManager;
         _mapService = mapService;
+        _authService = authService;
     }
 
     public override async void ChannelRead(IChannelHandlerContext context, object message)
     {
         try 
         {
-            if (message is PositionRequest positionRequest)
+            ServerLogger.LogNetwork($"收到消息类型: {message.GetType().Name}");
+
+            if (message is Message msg)
             {
-                var session = _sessionManager.GetSession(context.Channel);
-                if (session != null)
+                ServerLogger.LogNetwork($"处理消息 - 类型: {msg.Type}");
+                switch (msg.Type)
                 {
-                    ServerLogger.LogPlayer($"收到位置更新 - 玩家: {session.PlayerId}, 位置: ({positionRequest.X:F2}, {positionRequest.Y:F2}), 朝向: {positionRequest.Direction}");
-                    await _mapService.UpdatePosition(session.PlayerId, positionRequest.X, positionRequest.Y, positionRequest.Direction);
+                    // Auth相关消息
+                    case MessageType.RegisterRequest:
+                        var registerRequest = msg.RegisterRequest;
+                        ServerLogger.LogNetwork($"处理注册请求 - 邮箱: {registerRequest.Email}, 玩家名: {registerRequest.PlayerName}");
+                        var result = await _authService.Register(
+                            registerRequest.Email, 
+                            registerRequest.Password,
+                            registerRequest.PlayerName
+                        );
+                        await context.WriteAndFlushAsync(new Message
+                        {
+                            Type = MessageType.RegisterResponse,
+                            RegisterResponse = new RegisterResponse 
+                            {
+                                Success = result.success,
+                                Message = result.message
+                            }
+                        });
+                        break;
+
+                    case MessageType.LoginRequest:
+                        var loginRequest = msg.LoginRequest;
+                        ServerLogger.LogNetwork($"处理登录请求 - 邮箱: {loginRequest.Email}");
+                        var loginResult = await _authService.Login(loginRequest.Email, loginRequest.Password);
+                        ServerLogger.LogNetwork($"登录结果 - 成功: {loginResult.success}, 消息: {loginResult.message}");
+                        await context.WriteAndFlushAsync(new Message
+                        {
+                            Type = MessageType.LoginResponse,
+                            LoginResponse = new LoginResponse
+                            {
+                                Success = loginResult.success,
+                                Message = loginResult.message,
+                                Token = loginResult.token,
+                                PlayerName = loginResult.playerName,
+                                PositionX = loginResult.positionX,
+                                PositionY = loginResult.positionY,
+                                Direction = loginResult.direction
+                            }
+                        });
+                        if (loginResult.success)
+                        {
+                            var session = _sessionManager.GetSession(context.Channel);
+                            if (session != null)
+                            {
+                                await _sessionManager.OnAuthenticationSuccess(session, loginRequest.Email, loginResult.token!);
+                                ServerLogger.LogNetwork($"认证成功 - 玩家ID: {session.PlayerId}");
+                            }
+                        }
+                        break;
+
+                    case MessageType.VerifyEmailRequest:
+                        var verifyRequest = msg.VerifyRequest;
+                        ServerLogger.LogNetwork($"处理邮箱验证请求 - 邮箱: {verifyRequest.Email}, 验证码: {verifyRequest.Code}");
+                        var verifyResult = await _authService.VerifyEmail(verifyRequest.Email, verifyRequest.Code);
+                        ServerLogger.LogNetwork($"验证结果 - 成功: {verifyResult.success}, 消息: {verifyResult.message}");
+                        await context.WriteAndFlushAsync(new Message
+                        {
+                            Type = MessageType.VerifyEmailResponse,
+                            VerifyResponse = new VerifyEmailResponse
+                            {
+                                Success = verifyResult.success,
+                                Message = verifyResult.message
+                            }
+                        });
+                        break;
+
+                    // Game相关消息
+                    case MessageType.PositionUpdate:
+                        var currentSession = _sessionManager.GetSession(context.Channel);
+                        if (currentSession?.IsAuthenticated == true)
+                        {
+                            var position = msg.PositionUpdate;
+                            // ServerLogger.LogPlayer($"收到位置更新 - 玩家: {currentSession.PlayerId}, 位置: ({position.X:F2}, {position.Y:F2}), 朝向: {position.Direction}");
+                            await _mapService.UpdatePosition(currentSession.PlayerId, position.X, position.Y, position.Direction);
+                        }
+                        break;
+
+                    // ... 其他消息处理
                 }
-            }
-            else if (message is GameMessage gameMessage)
-            {
-                // 处理其他类型的消息...
             }
         }
         catch (Exception e)
         {
-            ServerLogger.LogError("处理消息时出错", e);
+            ServerLogger.LogError($"处理消息时出错: {e.Message}", e);
         }
         finally
         {

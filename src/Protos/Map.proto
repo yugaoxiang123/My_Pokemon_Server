@@ -46,10 +46,3 @@ message PlayerLeftMessage {
 message InitialPlayersMessage {
     repeated PlayerPosition players = 1;
 }
-
-message PositionRequest {
-    float x = 1;
-    float y = 2;
-    int32 direction = 3;
-    string player_id = 4;
-}

@@ -21,9 +21,11 @@ public class NettyTcpServer
     private readonly MultithreadEventLoopGroup _workerGroup;
     // 地图服务，处理位置相关逻辑
     private readonly MapService _mapService;
+    // 认证服务，处理认证相关逻辑
+    private readonly AuthService _authService;
     
     // 构造函数，注入依赖
-    public NettyTcpServer(SessionManager sessionManager, MapService mapService)
+    public NettyTcpServer(SessionManager sessionManager, MapService mapService, AuthService authService)
     {
         _sessionManager = sessionManager;
         // 创建一个单线程的主线程组
@@ -31,6 +33,7 @@ public class NettyTcpServer
         // 创建工作线程组，线程数默认为CPU核心数*2
         _workerGroup = new MultithreadEventLoopGroup();
         _mapService = mapService;
+        _authService = authService;
     }
 
     // 启动服务器方法
@@ -53,16 +56,14 @@ public class NettyTcpServer
                 var pipeline = channel.Pipeline;
                 
                 pipeline.AddLast(new ProtobufVarint32FrameDecoder());     // 1.解析消息长度
-                // 添加两个解码器，分别处理不同类型的消息
-                pipeline.AddLast("positionDecoder", new ProtobufDecoder(PositionRequest.Parser));
-                pipeline.AddLast("gameMessageDecoder", new ProtobufDecoder(GameMessage.Parser));
+                
+                // 使用统一的消息解码器
+                pipeline.AddLast(new ProtobufDecoder(Message.Parser));  // 2.消息解码
+                
                 pipeline.AddLast(new ProtobufVarint32LengthFieldPrepender()); // 3.添加消息长度
-                pipeline.AddLast(new ProtobufEncoder());                  // 4.编码消息体
+                pipeline.AddLast(new ProtobufEncoder());                      // 4.编码消息体
                 
-                // 添加消息路由器，处理各类消息
-                pipeline.AddLast(new MessageRouter(_sessionManager, _mapService));
-                
-                // 添加连接生命周期处理器
+                pipeline.AddLast(new MessageRouter(_sessionManager, _mapService, _authService));
                 pipeline.AddLast(new ServerHandler(_sessionManager, _mapService));
             }));
 
@@ -89,33 +90,30 @@ public class NettyTcpServer
             _mapService = mapService;
         }
 
-        // 当新连接建立时调用
-        public override async void ChannelActive(IChannelHandlerContext context)
+        public override void ChannelActive(IChannelHandlerContext context)
         {
-            var remoteAddress = context.Channel.RemoteAddress;
-            ServerLogger.LogNetwork($"新客户端连接: {remoteAddress}");
-            // 传入 MapService
-            await _sessionManager.CreateSession(context, _mapService);
+            ServerLogger.LogNetwork($"新客户端连接: {context.Channel.RemoteAddress}");
+            _sessionManager.CreateSession(context);
             base.ChannelActive(context);
         }
 
-        // 当连接断开时调用
         public override async void ChannelInactive(IChannelHandlerContext context)
         {
-            // 获取会话信息
             var session = context.Channel.GetAttribute(SessionManager.SessionKey).Get();
             if (session != null)
             {
                 ServerLogger.LogNetwork($"客户端断开连接: {session.PlayerId}");
                 
-                // 广播玩家离开消息给其他玩家
-                await _sessionManager.BroadcastAsync(new PlayerLeftMessage 
-                { 
-                    PlayerId = session.PlayerId 
-                });
+                if (session.IsAuthenticated)
+                {
+                    // 只有认证过的玩家才广播离开消息
+                    await _sessionManager.BroadcastAsync(new PlayerLeftMessage 
+                    { 
+                        PlayerId = session.PlayerId 
+                    });
+                }
                 
-                // 清理会话
-                _sessionManager.RemoveSession(session.PlayerId);
+               await _sessionManager.RemoveSession(session.PlayerId);
             }
             base.ChannelInactive(context);
         }
