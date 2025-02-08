@@ -7,6 +7,7 @@ using MyPokemon.Utils;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
+using MoveDirection = MyPokemon.Protocol.MoveDirection;
 
 namespace MyPokemon.Services;
 
@@ -102,7 +103,7 @@ public class AuthService
     }
 
     // 登录
-    public async Task<(bool success, string message, string? token, string? playerName, float positionX, float positionY, int direction)> Login(string email, string password)
+    public async Task<(bool success, string message, string? token, string? playerName, float positionX, float positionY, MoveDirection direction)> Login(string email, string password)
     {
         try
         {

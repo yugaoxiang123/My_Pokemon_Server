@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using MyPokemon.Models;
 using MyPokemon.Utils;
 namespace MyPokemon.Services;
+using MoveDirection = MyPokemon.Protocol.MoveDirection;
 
 public class DatabaseService
 {
@@ -142,14 +143,21 @@ public class DatabaseService
         return result > 0;
     }
 
-    public async Task<bool> UpdateLastPosition(string playerId, float x, float y, int direction)
+    public async Task<bool> UpdateLastPosition(string playerId, float x, float y, MoveDirection direction)
     {
         using var conn = CreateConnection();
         var result = await conn.ExecuteAsync(@"
             UPDATE users 
-            SET last_position_x = @X, last_position_y = @Y, last_direction = @Direction
+            SET last_position_x = @X, 
+                last_position_y = @Y, 
+                last_direction = @Direction
             WHERE player_name = @PlayerId",
-            new { PlayerId = playerId, X = x, Y = y, Direction = direction }
+            new { 
+                PlayerId = playerId, 
+                X = x, 
+                Y = y, 
+                Direction = (int)direction
+            }
         );
         return result > 0;
     }

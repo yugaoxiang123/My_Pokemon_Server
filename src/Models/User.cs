@@ -1,3 +1,5 @@
+using MoveDirection = MyPokemon.Protocol.MoveDirection;
+
 namespace MyPokemon.Models;
 
 public class User
@@ -13,5 +15,5 @@ public class User
     public DateTime? LastLoginAt { get; set; }
     public float LastPositionX { get; set; }
     public float LastPositionY { get; set; }
-    public int LastDirection { get; set; }
+    public MoveDirection LastDirection { get; set; }
 } 

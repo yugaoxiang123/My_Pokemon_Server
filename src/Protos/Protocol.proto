@@ -25,21 +25,21 @@ message Message {
 
 // 统一的消息类型枚举
 enum MessageType {
-    UNKNOWN = 0;
+    MESSAGE_TYPE_UNKNOWN = 0;
     
     // Auth消息类型 1-100
-    REGISTER_REQUEST = 1;
-    REGISTER_RESPONSE = 2;
-    LOGIN_REQUEST = 3;
-    LOGIN_RESPONSE = 4;
-    VERIFY_EMAIL_REQUEST = 5;
-    VERIFY_EMAIL_RESPONSE = 6;
+    MESSAGE_TYPE_REGISTER_REQUEST = 1;
+    MESSAGE_TYPE_REGISTER_RESPONSE = 2;
+    MESSAGE_TYPE_LOGIN_REQUEST = 3;
+    MESSAGE_TYPE_LOGIN_RESPONSE = 4;
+    MESSAGE_TYPE_VERIFY_EMAIL_REQUEST = 5;
+    MESSAGE_TYPE_VERIFY_EMAIL_RESPONSE = 6;
     
     // Game消息类型 101-200
-    POSITION_UPDATE = 101;
-    PLAYER_JOINED = 102;
-    PLAYER_LEFT = 103;
-    INITIAL_PLAYERS = 104;
+    MESSAGE_TYPE_POSITION_UPDATE = 101;
+    MESSAGE_TYPE_PLAYER_JOINED = 102;
+    MESSAGE_TYPE_PLAYER_LEFT = 103;
+    MESSAGE_TYPE_INITIAL_PLAYERS = 104;
 }
 
 // Auth相关消息定义
@@ -66,7 +66,7 @@ message LoginResponse {
     string player_name = 4;
     float position_x = 5;
     float position_y = 6;
-    int32 direction = 7;
+    MoveDirection direction = 7;
 }
 
 message VerifyEmailRequest {
@@ -84,15 +84,17 @@ message PlayerPosition {
     string player_id = 1;
     float x = 2;
     float y = 3;
-    int32 direction = 4;
+    MoveDirection direction = 4;
     int64 last_update_time = 5;
+    MotionStates motion_state = 6;
 }
 
 message PlayerJoinedMessage {
     string player_id = 1;
     float x = 2;
     float y = 3;
-    int32 direction = 4;
+    MoveDirection direction = 4;
+    MotionStates motion_state = 5;
 }
 
 message PlayerLeftMessage {
@@ -101,4 +103,31 @@ message PlayerLeftMessage {
 
 message InitialPlayersMessage {
     repeated PlayerPosition players = 1;
+}
+
+// 移动方向
+enum MoveDirection {
+    MOVE_DIRECTION_NONE = 0;
+    MOVE_DIRECTION_UP = 1;
+    MOVE_DIRECTION_DOWN = 2;
+    MOVE_DIRECTION_LEFT = 3;
+    MOVE_DIRECTION_RIGHT = 4;
+}
+
+// 运动状态
+enum MotionStates {
+    MOTION_STATES_IDLE = 0;
+    MOTION_STATES_MOVEMENT = 1;
+    MOTION_STATES_JUMP = 2;
+    MOTION_STATES_TELEPORT = 3;
 } 
+
+message PlayerEnterRequest {
+    //TODO 选择的角色ID(int)
+}
+
+
+message PlayerEnterResponse {
+    bool success = 1;
+    string player_id = 2;
+}

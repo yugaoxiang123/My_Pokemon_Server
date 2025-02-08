@@ -10,6 +10,8 @@ using System.Linq;
 using ModelPosition = MyPokemon.Models.PlayerPosition;
 using ProtoPosition = MyPokemon.Protocol.PlayerPosition;
 using Microsoft.Extensions.Configuration;
+using MoveDirection = MyPokemon.Protocol.MoveDirection;
+using MotionStates = MyPokemon.Protocol.MotionStates;
 
 public class MapService
 {
@@ -41,25 +43,24 @@ public class MapService
         _sessionManager ?? throw new InvalidOperationException("SessionManager not initialized");
 
     // 更新玩家位置
-    public async Task UpdatePosition(string playerId, float x, float y, int direction)
+    public async Task UpdatePosition(string playerId, float x, float y, MoveDirection direction, MotionStates motionState)
     {
         try 
         {
-            // ServerLogger.LogPlayer($"开始更新位置 - ID: {playerId}");
             var position = new ModelPosition
             {
                 PlayerId = playerId,
                 X = x,
                 Y = y,
                 Direction = direction,
+                MotionState = motionState,  // 添加运动状态
                 LastUpdateTime = DateTime.UtcNow
             };
 
-            // 只保存到Redis
+            // 保存到Redis
             try
             {
                 var json = System.Text.Json.JsonSerializer.Serialize(position);
-                // ServerLogger.LogPlayer($"准备保存到Redis - Key: {POSITION_KEY + playerId}");
                 
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
                 await _cache.SetStringAsync(
@@ -132,8 +133,7 @@ public class MapService
     {
         try
         {
-            var nearbyPositions = await GetNearbyPlayers(position.X, position.Y, _viewDistance,position.PlayerId);
-            // nearbyPositions = nearbyPositions.Where(p => p.PlayerId != position.PlayerId).ToList();
+            var nearbyPositions = await GetNearbyPlayers(position.X, position.Y, _viewDistance, position.PlayerId);
 
             if (nearbyPositions.Count == 0)
             {
@@ -147,6 +147,7 @@ public class MapService
                 X = position.X,
                 Y = position.Y,
                 Direction = position.Direction,
+                MotionState = position.MotionState,  // 包含运动状态
                 LastUpdateTime = ((DateTimeOffset)DateTime.UtcNow).ToUnixTimeSeconds()
             };
 

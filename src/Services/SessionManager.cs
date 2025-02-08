@@ -14,6 +14,8 @@ using ProtoPosition = MyPokemon.Protocol.PlayerPosition;
 using ModelPosition = MyPokemon.Models.PlayerPosition;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
+using MoveDirection = MyPokemon.Protocol.MoveDirection;
+using MotionStates = MyPokemon.Protocol.MotionStates;
 
 public class Session
 {
@@ -125,14 +127,16 @@ public class SessionManager
             // 恢复到上次的位置
             float x = user.LastPositionX;
             float y = user.LastPositionY;
-            int direction = user.LastDirection;
+            MoveDirection direction = user.LastDirection;
+            MotionStates motionState = MotionStates.Idle;  // 修正枚举值名称
             
             // 设置位置
-            await _mapService.UpdatePosition(session.PlayerId, x, y, direction);
+            await _mapService.UpdatePosition(session.PlayerId, x, y, direction, motionState);
 
             // 获取附近的玩家列表
             var nearbyPlayers = await _mapService.GetNearbyPlayers(x, y, 15, session.PlayerId);
             
+
             // 发送初始化消息
             if (nearbyPlayers.Any())
             {

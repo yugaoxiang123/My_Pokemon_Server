@@ -42,28 +42,41 @@ namespace MyPokemon.Protocol {
             "d29yZBgCIAEoCRITCgtwbGF5ZXJfbmFtZRgDIAEoCSI0ChBSZWdpc3RlclJl",
             "c3BvbnNlEg8KB3N1Y2Nlc3MYASABKAgSDwoHbWVzc2FnZRgCIAEoCSIvCgxM",
             "b2dpblJlcXVlc3QSDQoFZW1haWwYASABKAkSEAoIcGFzc3dvcmQYAiABKAki",
-            "kAEKDUxvZ2luUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCBIPCgdtZXNzYWdl",
+            "qQEKDUxvZ2luUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCBIPCgdtZXNzYWdl",
             "GAIgASgJEg0KBXRva2VuGAMgASgJEhMKC3BsYXllcl9uYW1lGAQgASgJEhIK",
-            "CnBvc2l0aW9uX3gYBSABKAISEgoKcG9zaXRpb25feRgGIAEoAhIRCglkaXJl",
-            "Y3Rpb24YByABKAUiMQoSVmVyaWZ5RW1haWxSZXF1ZXN0Eg0KBWVtYWlsGAEg",
-            "ASgJEgwKBGNvZGUYAiABKAkiNwoTVmVyaWZ5RW1haWxSZXNwb25zZRIPCgdz",
-            "dWNjZXNzGAEgASgIEg8KB21lc3NhZ2UYAiABKAkiZgoOUGxheWVyUG9zaXRp",
-            "b24SEQoJcGxheWVyX2lkGAEgASgJEgkKAXgYAiABKAISCQoBeRgDIAEoAhIR",
-            "CglkaXJlY3Rpb24YBCABKAUSGAoQbGFzdF91cGRhdGVfdGltZRgFIAEoAyJR",
-            "ChNQbGF5ZXJKb2luZWRNZXNzYWdlEhEKCXBsYXllcl9pZBgBIAEoCRIJCgF4",
-            "GAIgASgCEgkKAXkYAyABKAISEQoJZGlyZWN0aW9uGAQgASgFIiYKEVBsYXll",
-            "ckxlZnRNZXNzYWdlEhEKCXBsYXllcl9pZBgBIAEoCSJCChVJbml0aWFsUGxh",
-            "eWVyc01lc3NhZ2USKQoHcGxheWVycxgBIAMoCzIYLlByb3RvY29sLlBsYXll",
-            "clBvc2l0aW9uKvEBCgtNZXNzYWdlVHlwZRILCgdVTktOT1dOEAASFAoQUkVH",
-            "SVNURVJfUkVRVUVTVBABEhUKEVJFR0lTVEVSX1JFU1BPTlNFEAISEQoNTE9H",
-            "SU5fUkVRVUVTVBADEhIKDkxPR0lOX1JFU1BPTlNFEAQSGAoUVkVSSUZZX0VN",
-            "QUlMX1JFUVVFU1QQBRIZChVWRVJJRllfRU1BSUxfUkVTUE9OU0UQBhITCg9Q",
-            "T1NJVElPTl9VUERBVEUQZRIRCg1QTEFZRVJfSk9JTkVEEGYSDwoLUExBWUVS",
-            "X0xFRlQQZxITCg9JTklUSUFMX1BMQVlFUlMQaEIVqgISTXlQb2tlbW9uLlBy",
-            "b3RvY29sYgZwcm90bzM="));
+            "CnBvc2l0aW9uX3gYBSABKAISEgoKcG9zaXRpb25feRgGIAEoAhIqCglkaXJl",
+            "Y3Rpb24YByABKA4yFy5Qcm90b2NvbC5Nb3ZlRGlyZWN0aW9uIjEKElZlcmlm",
+            "eUVtYWlsUmVxdWVzdBINCgVlbWFpbBgBIAEoCRIMCgRjb2RlGAIgASgJIjcK",
+            "E1ZlcmlmeUVtYWlsUmVzcG9uc2USDwoHc3VjY2VzcxgBIAEoCBIPCgdtZXNz",
+            "YWdlGAIgASgJIq0BCg5QbGF5ZXJQb3NpdGlvbhIRCglwbGF5ZXJfaWQYASAB",
+            "KAkSCQoBeBgCIAEoAhIJCgF5GAMgASgCEioKCWRpcmVjdGlvbhgEIAEoDjIX",
+            "LlByb3RvY29sLk1vdmVEaXJlY3Rpb24SGAoQbGFzdF91cGRhdGVfdGltZRgF",
+            "IAEoAxIsCgxtb3Rpb25fc3RhdGUYBiABKA4yFi5Qcm90b2NvbC5Nb3Rpb25T",
+            "dGF0ZXMimAEKE1BsYXllckpvaW5lZE1lc3NhZ2USEQoJcGxheWVyX2lkGAEg",
+            "ASgJEgkKAXgYAiABKAISCQoBeRgDIAEoAhIqCglkaXJlY3Rpb24YBCABKA4y",
+            "Fy5Qcm90b2NvbC5Nb3ZlRGlyZWN0aW9uEiwKDG1vdGlvbl9zdGF0ZRgFIAEo",
+            "DjIWLlByb3RvY29sLk1vdGlvblN0YXRlcyImChFQbGF5ZXJMZWZ0TWVzc2Fn",
+            "ZRIRCglwbGF5ZXJfaWQYASABKAkiQgoVSW5pdGlhbFBsYXllcnNNZXNzYWdl",
+            "EikKB3BsYXllcnMYASADKAsyGC5Qcm90b2NvbC5QbGF5ZXJQb3NpdGlvbiqA",
+            "AwoLTWVzc2FnZVR5cGUSGAoUTUVTU0FHRV9UWVBFX1VOS05PV04QABIhCh1N",
+            "RVNTQUdFX1RZUEVfUkVHSVNURVJfUkVRVUVTVBABEiIKHk1FU1NBR0VfVFlQ",
+            "RV9SRUdJU1RFUl9SRVNQT05TRRACEh4KGk1FU1NBR0VfVFlQRV9MT0dJTl9S",
+            "RVFVRVNUEAMSHwobTUVTU0FHRV9UWVBFX0xPR0lOX1JFU1BPTlNFEAQSJQoh",
+            "TUVTU0FHRV9UWVBFX1ZFUklGWV9FTUFJTF9SRVFVRVNUEAUSJgoiTUVTU0FH",
+            "RV9UWVBFX1ZFUklGWV9FTUFJTF9SRVNQT05TRRAGEiAKHE1FU1NBR0VfVFlQ",
+            "RV9QT1NJVElPTl9VUERBVEUQZRIeChpNRVNTQUdFX1RZUEVfUExBWUVSX0pP",
+            "SU5FRBBmEhwKGE1FU1NBR0VfVFlQRV9QTEFZRVJfTEVGVBBnEiAKHE1FU1NB",
+            "R0VfVFlQRV9JTklUSUFMX1BMQVlFUlMQaCqLAQoNTW92ZURpcmVjdGlvbhIX",
+            "ChNNT1ZFX0RJUkVDVElPTl9OT05FEAASFQoRTU9WRV9ESVJFQ1RJT05fVVAQ",
+            "ARIXChNNT1ZFX0RJUkVDVElPTl9ET1dOEAISFwoTTU9WRV9ESVJFQ1RJT05f",
+            "TEVGVBADEhgKFE1PVkVfRElSRUNUSU9OX1JJR0hUEAQqdgoMTW90aW9uU3Rh",
+            "dGVzEhYKEk1PVElPTl9TVEFURVNfSURMRRAAEhoKFk1PVElPTl9TVEFURVNf",
+            "TU9WRU1FTlQQARIWChJNT1RJT05fU1RBVEVTX0pVTVAQAhIaChZNT1RJT05f",
+            "U1RBVEVTX1RFTEVQT1JUEANCFaoCEk15UG9rZW1vbi5Qcm90b2NvbGIGcHJv",
+            "dG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MyPokemon.Protocol.MessageType), }, null, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::MyPokemon.Protocol.MessageType), typeof(global::MyPokemon.Protocol.MoveDirection), typeof(global::MyPokemon.Protocol.MotionStates), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.Message), global::MyPokemon.Protocol.Message.Parser, new[]{ "Type", "RegisterRequest", "RegisterResponse", "LoginRequest", "LoginResponse", "VerifyRequest", "VerifyResponse", "PositionUpdate", "PlayerJoined", "PlayerLeft", "InitialPlayers" }, new[]{ "Payload" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.RegisterRequest), global::MyPokemon.Protocol.RegisterRequest.Parser, new[]{ "Email", "Password", "PlayerName" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.RegisterResponse), global::MyPokemon.Protocol.RegisterResponse.Parser, new[]{ "Success", "Message" }, null, null, null, null),
@@ -71,8 +84,8 @@ namespace MyPokemon.Protocol {
             new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.LoginResponse), global::MyPokemon.Protocol.LoginResponse.Parser, new[]{ "Success", "Message", "Token", "PlayerName", "PositionX", "PositionY", "Direction" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.VerifyEmailRequest), global::MyPokemon.Protocol.VerifyEmailRequest.Parser, new[]{ "Email", "Code" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.VerifyEmailResponse), global::MyPokemon.Protocol.VerifyEmailResponse.Parser, new[]{ "Success", "Message" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.PlayerPosition), global::MyPokemon.Protocol.PlayerPosition.Parser, new[]{ "PlayerId", "X", "Y", "Direction", "LastUpdateTime" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.PlayerJoinedMessage), global::MyPokemon.Protocol.PlayerJoinedMessage.Parser, new[]{ "PlayerId", "X", "Y", "Direction" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.PlayerPosition), global::MyPokemon.Protocol.PlayerPosition.Parser, new[]{ "PlayerId", "X", "Y", "Direction", "LastUpdateTime", "MotionState" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.PlayerJoinedMessage), global::MyPokemon.Protocol.PlayerJoinedMessage.Parser, new[]{ "PlayerId", "X", "Y", "Direction", "MotionState" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.PlayerLeftMessage), global::MyPokemon.Protocol.PlayerLeftMessage.Parser, new[]{ "PlayerId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::MyPokemon.Protocol.InitialPlayersMessage), global::MyPokemon.Protocol.InitialPlayersMessage.Parser, new[]{ "Players" }, null, null, null, null)
           }));
@@ -85,23 +98,44 @@ namespace MyPokemon.Protocol {
   /// 统一的消息类型枚举
   /// </summary>
   public enum MessageType {
-    [pbr::OriginalName("UNKNOWN")] Unknown = 0,
+    [pbr::OriginalName("MESSAGE_TYPE_UNKNOWN")] Unknown = 0,
     /// <summary>
     /// Auth消息类型 1-100
     /// </summary>
-    [pbr::OriginalName("REGISTER_REQUEST")] RegisterRequest = 1,
-    [pbr::OriginalName("REGISTER_RESPONSE")] RegisterResponse = 2,
-    [pbr::OriginalName("LOGIN_REQUEST")] LoginRequest = 3,
-    [pbr::OriginalName("LOGIN_RESPONSE")] LoginResponse = 4,
-    [pbr::OriginalName("VERIFY_EMAIL_REQUEST")] VerifyEmailRequest = 5,
-    [pbr::OriginalName("VERIFY_EMAIL_RESPONSE")] VerifyEmailResponse = 6,
+    [pbr::OriginalName("MESSAGE_TYPE_REGISTER_REQUEST")] RegisterRequest = 1,
+    [pbr::OriginalName("MESSAGE_TYPE_REGISTER_RESPONSE")] RegisterResponse = 2,
+    [pbr::OriginalName("MESSAGE_TYPE_LOGIN_REQUEST")] LoginRequest = 3,
+    [pbr::OriginalName("MESSAGE_TYPE_LOGIN_RESPONSE")] LoginResponse = 4,
+    [pbr::OriginalName("MESSAGE_TYPE_VERIFY_EMAIL_REQUEST")] VerifyEmailRequest = 5,
+    [pbr::OriginalName("MESSAGE_TYPE_VERIFY_EMAIL_RESPONSE")] VerifyEmailResponse = 6,
     /// <summary>
     /// Game消息类型 101-200
     /// </summary>
-    [pbr::OriginalName("POSITION_UPDATE")] PositionUpdate = 101,
-    [pbr::OriginalName("PLAYER_JOINED")] PlayerJoined = 102,
-    [pbr::OriginalName("PLAYER_LEFT")] PlayerLeft = 103,
-    [pbr::OriginalName("INITIAL_PLAYERS")] InitialPlayers = 104,
+    [pbr::OriginalName("MESSAGE_TYPE_POSITION_UPDATE")] PositionUpdate = 101,
+    [pbr::OriginalName("MESSAGE_TYPE_PLAYER_JOINED")] PlayerJoined = 102,
+    [pbr::OriginalName("MESSAGE_TYPE_PLAYER_LEFT")] PlayerLeft = 103,
+    [pbr::OriginalName("MESSAGE_TYPE_INITIAL_PLAYERS")] InitialPlayers = 104,
+  }
+
+  /// <summary>
+  /// 移动方向
+  /// </summary>
+  public enum MoveDirection {
+    [pbr::OriginalName("MOVE_DIRECTION_NONE")] None = 0,
+    [pbr::OriginalName("MOVE_DIRECTION_UP")] Up = 1,
+    [pbr::OriginalName("MOVE_DIRECTION_DOWN")] Down = 2,
+    [pbr::OriginalName("MOVE_DIRECTION_LEFT")] Left = 3,
+    [pbr::OriginalName("MOVE_DIRECTION_RIGHT")] Right = 4,
+  }
+
+  /// <summary>
+  /// 运动状态
+  /// </summary>
+  public enum MotionStates {
+    [pbr::OriginalName("MOTION_STATES_IDLE")] Idle = 0,
+    [pbr::OriginalName("MOTION_STATES_MOVEMENT")] Movement = 1,
+    [pbr::OriginalName("MOTION_STATES_JUMP")] Jump = 2,
+    [pbr::OriginalName("MOTION_STATES_TELEPORT")] Teleport = 3,
   }
 
   #endregion
@@ -1704,10 +1738,10 @@ namespace MyPokemon.Protocol {
 
     /// <summary>Field number for the "direction" field.</summary>
     public const int DirectionFieldNumber = 7;
-    private int direction_;
+    private global::MyPokemon.Protocol.MoveDirection direction_ = global::MyPokemon.Protocol.MoveDirection.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Direction {
+    public global::MyPokemon.Protocol.MoveDirection Direction {
       get { return direction_; }
       set {
         direction_ = value;
@@ -1749,7 +1783,7 @@ namespace MyPokemon.Protocol {
       if (PlayerName.Length != 0) hash ^= PlayerName.GetHashCode();
       if (PositionX != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PositionX);
       if (PositionY != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(PositionY);
-      if (Direction != 0) hash ^= Direction.GetHashCode();
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) hash ^= Direction.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1792,9 +1826,9 @@ namespace MyPokemon.Protocol {
         output.WriteRawTag(53);
         output.WriteFloat(PositionY);
       }
-      if (Direction != 0) {
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) {
         output.WriteRawTag(56);
-        output.WriteInt32(Direction);
+        output.WriteEnum((int) Direction);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -1830,9 +1864,9 @@ namespace MyPokemon.Protocol {
         output.WriteRawTag(53);
         output.WriteFloat(PositionY);
       }
-      if (Direction != 0) {
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) {
         output.WriteRawTag(56);
-        output.WriteInt32(Direction);
+        output.WriteEnum((int) Direction);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -1862,8 +1896,8 @@ namespace MyPokemon.Protocol {
       if (PositionY != 0F) {
         size += 1 + 4;
       }
-      if (Direction != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Direction);
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Direction);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1895,7 +1929,7 @@ namespace MyPokemon.Protocol {
       if (other.PositionY != 0F) {
         PositionY = other.PositionY;
       }
-      if (other.Direction != 0) {
+      if (other.Direction != global::MyPokemon.Protocol.MoveDirection.None) {
         Direction = other.Direction;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
@@ -1938,7 +1972,7 @@ namespace MyPokemon.Protocol {
             break;
           }
           case 56: {
-            Direction = input.ReadInt32();
+            Direction = (global::MyPokemon.Protocol.MoveDirection) input.ReadEnum();
             break;
           }
         }
@@ -1981,7 +2015,7 @@ namespace MyPokemon.Protocol {
             break;
           }
           case 56: {
-            Direction = input.ReadInt32();
+            Direction = (global::MyPokemon.Protocol.MoveDirection) input.ReadEnum();
             break;
           }
         }
@@ -2485,6 +2519,7 @@ namespace MyPokemon.Protocol {
       y_ = other.y_;
       direction_ = other.direction_;
       lastUpdateTime_ = other.lastUpdateTime_;
+      motionState_ = other.motionState_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2532,10 +2567,10 @@ namespace MyPokemon.Protocol {
 
     /// <summary>Field number for the "direction" field.</summary>
     public const int DirectionFieldNumber = 4;
-    private int direction_;
+    private global::MyPokemon.Protocol.MoveDirection direction_ = global::MyPokemon.Protocol.MoveDirection.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Direction {
+    public global::MyPokemon.Protocol.MoveDirection Direction {
       get { return direction_; }
       set {
         direction_ = value;
@@ -2551,6 +2586,18 @@ namespace MyPokemon.Protocol {
       get { return lastUpdateTime_; }
       set {
         lastUpdateTime_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "motion_state" field.</summary>
+    public const int MotionStateFieldNumber = 6;
+    private global::MyPokemon.Protocol.MotionStates motionState_ = global::MyPokemon.Protocol.MotionStates.Idle;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::MyPokemon.Protocol.MotionStates MotionState {
+      get { return motionState_; }
+      set {
+        motionState_ = value;
       }
     }
 
@@ -2574,6 +2621,7 @@ namespace MyPokemon.Protocol {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Y, other.Y)) return false;
       if (Direction != other.Direction) return false;
       if (LastUpdateTime != other.LastUpdateTime) return false;
+      if (MotionState != other.MotionState) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -2584,8 +2632,9 @@ namespace MyPokemon.Protocol {
       if (PlayerId.Length != 0) hash ^= PlayerId.GetHashCode();
       if (X != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(X);
       if (Y != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Y);
-      if (Direction != 0) hash ^= Direction.GetHashCode();
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) hash ^= Direction.GetHashCode();
       if (LastUpdateTime != 0L) hash ^= LastUpdateTime.GetHashCode();
+      if (MotionState != global::MyPokemon.Protocol.MotionStates.Idle) hash ^= MotionState.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -2616,13 +2665,17 @@ namespace MyPokemon.Protocol {
         output.WriteRawTag(29);
         output.WriteFloat(Y);
       }
-      if (Direction != 0) {
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) {
         output.WriteRawTag(32);
-        output.WriteInt32(Direction);
+        output.WriteEnum((int) Direction);
       }
       if (LastUpdateTime != 0L) {
         output.WriteRawTag(40);
         output.WriteInt64(LastUpdateTime);
+      }
+      if (MotionState != global::MyPokemon.Protocol.MotionStates.Idle) {
+        output.WriteRawTag(48);
+        output.WriteEnum((int) MotionState);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -2646,13 +2699,17 @@ namespace MyPokemon.Protocol {
         output.WriteRawTag(29);
         output.WriteFloat(Y);
       }
-      if (Direction != 0) {
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) {
         output.WriteRawTag(32);
-        output.WriteInt32(Direction);
+        output.WriteEnum((int) Direction);
       }
       if (LastUpdateTime != 0L) {
         output.WriteRawTag(40);
         output.WriteInt64(LastUpdateTime);
+      }
+      if (MotionState != global::MyPokemon.Protocol.MotionStates.Idle) {
+        output.WriteRawTag(48);
+        output.WriteEnum((int) MotionState);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -2673,11 +2730,14 @@ namespace MyPokemon.Protocol {
       if (Y != 0F) {
         size += 1 + 4;
       }
-      if (Direction != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Direction);
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Direction);
       }
       if (LastUpdateTime != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(LastUpdateTime);
+      }
+      if (MotionState != global::MyPokemon.Protocol.MotionStates.Idle) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) MotionState);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -2700,11 +2760,14 @@ namespace MyPokemon.Protocol {
       if (other.Y != 0F) {
         Y = other.Y;
       }
-      if (other.Direction != 0) {
+      if (other.Direction != global::MyPokemon.Protocol.MoveDirection.None) {
         Direction = other.Direction;
       }
       if (other.LastUpdateTime != 0L) {
         LastUpdateTime = other.LastUpdateTime;
+      }
+      if (other.MotionState != global::MyPokemon.Protocol.MotionStates.Idle) {
+        MotionState = other.MotionState;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -2734,11 +2797,15 @@ namespace MyPokemon.Protocol {
             break;
           }
           case 32: {
-            Direction = input.ReadInt32();
+            Direction = (global::MyPokemon.Protocol.MoveDirection) input.ReadEnum();
             break;
           }
           case 40: {
             LastUpdateTime = input.ReadInt64();
+            break;
+          }
+          case 48: {
+            MotionState = (global::MyPokemon.Protocol.MotionStates) input.ReadEnum();
             break;
           }
         }
@@ -2769,11 +2836,15 @@ namespace MyPokemon.Protocol {
             break;
           }
           case 32: {
-            Direction = input.ReadInt32();
+            Direction = (global::MyPokemon.Protocol.MoveDirection) input.ReadEnum();
             break;
           }
           case 40: {
             LastUpdateTime = input.ReadInt64();
+            break;
+          }
+          case 48: {
+            MotionState = (global::MyPokemon.Protocol.MotionStates) input.ReadEnum();
             break;
           }
         }
@@ -2821,6 +2892,7 @@ namespace MyPokemon.Protocol {
       x_ = other.x_;
       y_ = other.y_;
       direction_ = other.direction_;
+      motionState_ = other.motionState_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2868,13 +2940,25 @@ namespace MyPokemon.Protocol {
 
     /// <summary>Field number for the "direction" field.</summary>
     public const int DirectionFieldNumber = 4;
-    private int direction_;
+    private global::MyPokemon.Protocol.MoveDirection direction_ = global::MyPokemon.Protocol.MoveDirection.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public int Direction {
+    public global::MyPokemon.Protocol.MoveDirection Direction {
       get { return direction_; }
       set {
         direction_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "motion_state" field.</summary>
+    public const int MotionStateFieldNumber = 5;
+    private global::MyPokemon.Protocol.MotionStates motionState_ = global::MyPokemon.Protocol.MotionStates.Idle;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
+    public global::MyPokemon.Protocol.MotionStates MotionState {
+      get { return motionState_; }
+      set {
+        motionState_ = value;
       }
     }
 
@@ -2897,6 +2981,7 @@ namespace MyPokemon.Protocol {
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(X, other.X)) return false;
       if (!pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.Equals(Y, other.Y)) return false;
       if (Direction != other.Direction) return false;
+      if (MotionState != other.MotionState) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -2907,7 +2992,8 @@ namespace MyPokemon.Protocol {
       if (PlayerId.Length != 0) hash ^= PlayerId.GetHashCode();
       if (X != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(X);
       if (Y != 0F) hash ^= pbc::ProtobufEqualityComparers.BitwiseSingleEqualityComparer.GetHashCode(Y);
-      if (Direction != 0) hash ^= Direction.GetHashCode();
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) hash ^= Direction.GetHashCode();
+      if (MotionState != global::MyPokemon.Protocol.MotionStates.Idle) hash ^= MotionState.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -2938,9 +3024,13 @@ namespace MyPokemon.Protocol {
         output.WriteRawTag(29);
         output.WriteFloat(Y);
       }
-      if (Direction != 0) {
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) {
         output.WriteRawTag(32);
-        output.WriteInt32(Direction);
+        output.WriteEnum((int) Direction);
+      }
+      if (MotionState != global::MyPokemon.Protocol.MotionStates.Idle) {
+        output.WriteRawTag(40);
+        output.WriteEnum((int) MotionState);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -2964,9 +3054,13 @@ namespace MyPokemon.Protocol {
         output.WriteRawTag(29);
         output.WriteFloat(Y);
       }
-      if (Direction != 0) {
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) {
         output.WriteRawTag(32);
-        output.WriteInt32(Direction);
+        output.WriteEnum((int) Direction);
+      }
+      if (MotionState != global::MyPokemon.Protocol.MotionStates.Idle) {
+        output.WriteRawTag(40);
+        output.WriteEnum((int) MotionState);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(ref output);
@@ -2987,8 +3081,11 @@ namespace MyPokemon.Protocol {
       if (Y != 0F) {
         size += 1 + 4;
       }
-      if (Direction != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Direction);
+      if (Direction != global::MyPokemon.Protocol.MoveDirection.None) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Direction);
+      }
+      if (MotionState != global::MyPokemon.Protocol.MotionStates.Idle) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) MotionState);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -3011,8 +3108,11 @@ namespace MyPokemon.Protocol {
       if (other.Y != 0F) {
         Y = other.Y;
       }
-      if (other.Direction != 0) {
+      if (other.Direction != global::MyPokemon.Protocol.MoveDirection.None) {
         Direction = other.Direction;
+      }
+      if (other.MotionState != global::MyPokemon.Protocol.MotionStates.Idle) {
+        MotionState = other.MotionState;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -3042,7 +3142,11 @@ namespace MyPokemon.Protocol {
             break;
           }
           case 32: {
-            Direction = input.ReadInt32();
+            Direction = (global::MyPokemon.Protocol.MoveDirection) input.ReadEnum();
+            break;
+          }
+          case 40: {
+            MotionState = (global::MyPokemon.Protocol.MotionStates) input.ReadEnum();
             break;
           }
         }
@@ -3073,7 +3177,11 @@ namespace MyPokemon.Protocol {
             break;
           }
           case 32: {
-            Direction = input.ReadInt32();
+            Direction = (global::MyPokemon.Protocol.MoveDirection) input.ReadEnum();
+            break;
+          }
+          case 40: {
+            MotionState = (global::MyPokemon.Protocol.MotionStates) input.ReadEnum();
             break;
           }
         }

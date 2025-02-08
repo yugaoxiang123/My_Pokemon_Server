@@ -103,8 +103,13 @@ public class MessageRouter : ChannelHandlerAdapter
                         if (currentSession?.IsAuthenticated == true)
                         {
                             var position = msg.PositionUpdate;
-                            // ServerLogger.LogPlayer($"收到位置更新 - 玩家: {currentSession.PlayerId}, 位置: ({position.X:F2}, {position.Y:F2}), 朝向: {position.Direction}");
-                            await _mapService.UpdatePosition(currentSession.PlayerId, position.X, position.Y, position.Direction);
+                            await _mapService.UpdatePosition(
+                                currentSession.PlayerId, 
+                                position.X, 
+                                position.Y, 
+                                position.Direction,
+                                position.MotionState  // 添加运动状态
+                            );
                         }
                         break;
 
