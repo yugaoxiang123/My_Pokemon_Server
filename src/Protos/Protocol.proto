@@ -121,13 +121,3 @@ enum MotionStates {
     MOTION_STATES_JUMP = 2;
     MOTION_STATES_TELEPORT = 3;
 } 
-
-message PlayerEnterRequest {
-    //TODO 选择的角色ID(int)
-}
-
-
-message PlayerEnterResponse {
-    bool success = 1;
-    string player_id = 2;
-}

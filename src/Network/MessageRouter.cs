@@ -56,6 +56,7 @@ public class MessageRouter : ChannelHandlerAdapter
                         ServerLogger.LogNetwork($"处理登录请求 - 邮箱: {loginRequest.Email}");
                         var loginResult = await _authService.Login(loginRequest.Email, loginRequest.Password);
                         ServerLogger.LogNetwork($"登录结果 - 成功: {loginResult.success}, 消息: {loginResult.message}");
+                        
                         await context.WriteAndFlushAsync(new Message
                         {
                             Type = MessageType.LoginResponse,
@@ -63,13 +64,14 @@ public class MessageRouter : ChannelHandlerAdapter
                             {
                                 Success = loginResult.success,
                                 Message = loginResult.message,
-                                Token = loginResult.token,
-                                PlayerName = loginResult.playerName,
-                                PositionX = loginResult.positionX,
-                                PositionY = loginResult.positionY,
-                                Direction = loginResult.direction
+                                Token = loginResult.success ? loginResult.token : "",
+                                PlayerName = loginResult.success ? loginResult.playerName : "",
+                                PositionX = loginResult.success ? loginResult.positionX : 0,
+                                PositionY = loginResult.success ? loginResult.positionY : 0,
+                                Direction = loginResult.success ? loginResult.direction : MoveDirection.None
                             }
                         });
+
                         if (loginResult.success)
                         {
                             var session = _sessionManager.GetSession(context.Channel);
