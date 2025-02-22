@@ -299,7 +299,7 @@ cd src
 # 生成位置同步相关代码
 protoc --csharp_out=./Protocol/Generated --proto_path=./Protos Map.proto
 # 生成认证相关代码
-protoc --csharp_out=./Protocol/Generated --proto_path=./Protos Auth.proto
+protoc --csharp_out=./Protocol/Generated --proto_path=./Protos Battle.proto
 ```
 
 ## 4. 构建和运行

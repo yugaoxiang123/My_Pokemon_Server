@@ -1,0 +1,171 @@
+syntax = "proto3";
+
+package Protocol;
+option csharp_namespace = "MyPokemon.Protocol";
+
+// 对战相关消息
+message BattleMessage {
+    BattleMessageType type = 1;
+    oneof payload {
+        BattleRequest battle_request = 2;           // 请求对战
+        BattleResponse battle_response = 3;         // 对战响应
+        BattleAction battle_action = 4;             // 对战行动
+        BattleStateUpdate battle_state_update = 5;  // 对战状态更新
+        BattleResult battle_result = 6;             // 对战结果
+    }
+}
+
+// 对战消息类型
+enum BattleMessageType {
+    BATTLE_MESSAGE_TYPE_UNKNOWN = 0;
+    BATTLE_MESSAGE_TYPE_REQUEST = 1;        // 请求对战
+    BATTLE_MESSAGE_TYPE_RESPONSE = 2;       // 对战响应
+    BATTLE_MESSAGE_TYPE_ACTION = 3;         // 对战行动
+    BATTLE_MESSAGE_TYPE_STATE_UPDATE = 4;   // 状态更新
+    BATTLE_MESSAGE_TYPE_RESULT = 5;         // 对战结果
+}
+
+// 对战请求
+message BattleRequest {
+    string player_id = 1;           // 发起对战的玩家ID
+    string opponent_id = 2;         // 对手ID(可选,为空则匹配)
+    BattleFormat format = 3;        // 对战格式
+    repeated Pokemon team = 4;      // 对战队伍
+}
+
+// 对战响应
+message BattleResponse {
+    bool success = 1;               // 是否成功
+    string message = 2;             // 响应消息
+    string battle_id = 3;           // 对战ID
+    string opponent_id = 4;         // 对手ID
+}
+
+// 对战行动
+message BattleAction {
+    string battle_id = 1;           // 对战ID
+    string player_id = 2;           // 玩家ID
+    ActionType action_type = 3;     // 行动类型
+    int32 move_index = 4;          // 技能索引
+    int32 target_position = 5;      // 目标位置
+    int32 switch_position = 6;      // 替换位置
+}
+
+// 对战状态更新
+message BattleStateUpdate {
+    string battle_id = 1;                    // 对战ID
+    repeated PokemonState active = 2;        // 场上宝可梦状态
+    repeated PokemonState bench = 3;         // 替补宝可梦状态
+    repeated BattleEffect effects = 4;       // 场地效果
+    string last_action_description = 5;      // 上一个行动描述
+}
+
+// 对战结果
+message BattleResult {
+    string battle_id = 1;           // 对战ID
+    string winner_id = 2;           // 获胜者ID
+    string loser_id = 3;           // 失败者ID
+    string result_description = 4;  // 结果描述
+}
+
+// 宝可梦信息
+message Pokemon {
+    string species = 1;             // 种类
+    string item = 2;               // 持有物品
+    string ability = 3;            // 特性
+    repeated string moves = 4;      // 技能列表
+    string nature = 5;             // 性格
+    EVs evs = 6;                   // 努力值
+    IVs ivs = 7;                   // 个体值
+    int32 level = 8;               // 等级
+    bool shiny = 9;                // 是否闪光
+}
+
+// 宝可梦状态
+message PokemonState {
+    string species = 1;             // 种类
+    int32 current_hp = 2;          // 当前HP
+    int32 max_hp = 3;              // 最大HP
+    repeated StatusCondition status = 4;  // 状态
+    repeated StatChange stat_changes = 5; // 能力变化
+}
+
+// 对战效果
+message BattleEffect {
+    EffectType type = 1;           // 效果类型
+    int32 turns_remaining = 2;     // 剩余回合
+    string description = 3;        // 效果描述
+}
+
+// 努力值
+message EVs {
+    int32 hp = 1;
+    int32 attack = 2;
+    int32 defense = 3;
+    int32 special_attack = 4;
+    int32 special_defense = 5;
+    int32 speed = 6;
+}
+
+// 个体值
+message IVs {
+    int32 hp = 1;
+    int32 attack = 2;
+    int32 defense = 3;
+    int32 special_attack = 4;
+    int32 special_defense = 5;
+    int32 speed = 6;
+}
+
+// 对战格式
+enum BattleFormat {
+    BATTLE_FORMAT_UNKNOWN = 0;
+    BATTLE_FORMAT_SINGLES = 1;      // 单打
+    BATTLE_FORMAT_DOUBLES = 2;      // 双打
+    BATTLE_FORMAT_TRIPLES = 3;      // 三打
+}
+
+// 行动类型
+enum ActionType {
+    ACTION_TYPE_UNKNOWN = 0;
+    ACTION_TYPE_MOVE = 1;           // 使用技能
+    ACTION_TYPE_SWITCH = 2;         // 替换宝可梦
+    ACTION_TYPE_FORFEIT = 3;        // 认输
+}
+
+// 状态异常
+enum StatusCondition {
+    STATUS_CONDITION_NONE = 0;
+    STATUS_CONDITION_BURN = 1;      // 烧伤
+    STATUS_CONDITION_FREEZE = 2;    // 冰冻
+    STATUS_CONDITION_PARALYSIS = 3; // 麻痹
+    STATUS_CONDITION_POISON = 4;    // 中毒
+    STATUS_CONDITION_SLEEP = 5;     // 睡眠
+}
+
+// 能力变化
+message StatChange {
+    StatType stat = 1;             // 能力类型
+    int32 stages = 2;              // 变化等级
+}
+
+// 能力类型
+enum StatType {
+    STAT_TYPE_UNKNOWN = 0;
+    STAT_TYPE_ATTACK = 1;
+    STAT_TYPE_DEFENSE = 2;
+    STAT_TYPE_SPECIAL_ATTACK = 3;
+    STAT_TYPE_SPECIAL_DEFENSE = 4;
+    STAT_TYPE_SPEED = 5;
+    STAT_TYPE_ACCURACY = 6;
+    STAT_TYPE_EVASION = 7;
+}
+
+// 效果类型
+enum EffectType {
+    EFFECT_TYPE_UNKNOWN = 0;
+    EFFECT_TYPE_WEATHER = 1;        // 天气
+    EFFECT_TYPE_TERRAIN = 2;        // 场地
+    EFFECT_TYPE_SCREEN = 3;         // 屏障
+    EFFECT_TYPE_ENTRY_HAZARD = 4;   // 场地陷阱
+} 

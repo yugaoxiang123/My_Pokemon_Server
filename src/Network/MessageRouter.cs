@@ -12,12 +12,14 @@ public class MessageRouter : ChannelHandlerAdapter
     private readonly SessionManager _sessionManager;
     private readonly MapService _mapService;
     private readonly AuthService _authService;
+    private readonly ShowdownService _showdownService;
 
-    public MessageRouter(SessionManager sessionManager, MapService mapService, AuthService authService)
+    public MessageRouter(SessionManager sessionManager, MapService mapService, AuthService authService, ShowdownService showdownService)
     {
         _sessionManager = sessionManager;
         _mapService = mapService;
         _authService = authService;
+        _showdownService = showdownService;
     }
 
     public override async void ChannelRead(IChannelHandlerContext context, object message)
@@ -115,10 +117,35 @@ public class MessageRouter : ChannelHandlerAdapter
                         }
                         break;
 
+
                     // ... 其他消息处理
+                }
+
+            }
+            else if (message is BattleMessage battleMsg)
+            {
+                var session = _sessionManager.GetSession(context.Channel);
+                if (session?.IsAuthenticated != true)
+                {
+                    ServerLogger.LogError($"未认证的会话尝试发送对战消息");
+                    return;
+                }
+
+                switch (battleMsg.Type)
+                {
+                    case BattleMessageType.Request:
+                        var battleRequest = battleMsg.BattleRequest;
+                        await _showdownService.StartBattleAsync(battleRequest);
+                        break;
+
+                    case BattleMessageType.Action:
+                        var battleAction = battleMsg.BattleAction;
+                        await _showdownService.SendBattleActionAsync(battleAction);
+                        break;
                 }
             }
         }
+    
         catch (Exception e)
         {
             ServerLogger.LogError($"处理消息时出错: {e.Message}", e);

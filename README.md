@@ -1,7 +1,7 @@
 # Pokemon 多人在线项目说明文档
 
 ## 1. 项目概述
-这是一个基于.NET和Unity的多人在线Pokemon游戏项目。服务端使用DotNetty处理网络通信，PostgreSQL存储用户数据，Redis缓存游戏数据，Protobuf进行消息序列化，支持邮箱认证的用户系统。
+这是一个基于.NET和Unity的多人在线Pokemon游戏项目。服务端使用DotNetty处理网络通信，集成了Pokemon Showdown对战系统，使用PostgreSQL存储用户数据，Redis缓存游戏数据，Protobuf进行消息序列化，支持邮箱认证的用户系统。
 
 ## 2. 项目结构
 
@@ -22,6 +22,7 @@ src/
 │   ├── SessionManager.cs    # 会话管理
 │   ├── AuthService.cs       # 认证服务
 │   ├── EmailService.cs      # 邮件服务
+│   ├── ShowdownService.cs   # 对战服务
 │   └── DatabaseService.cs   # 数据库服务
 │
 ├── Models/                 # 数据模型
@@ -29,7 +30,8 @@ src/
 │   └── User.cs             # 用户模型
 │
 └── Protos/                # 协议定义
-    └── Protocol.proto      # 统一消息协议定义
+    ├── Protocol.proto      # 统一消息协议定义
+    └── Battle.proto        # 对战消息协议定义
 ```
 
 ## 3. 核心功能
@@ -44,6 +46,11 @@ src/
     - 位置更新
     - 玩家加入/离开
     - 初始化玩家列表
+  - Battle相关消息
+    - 对战请求/响应
+    - 行动选择
+    - 状态更新
+    - 对战结果
 
 ### 3.2 位置同步系统
 - 实时位置更新
@@ -57,6 +64,24 @@ src/
 - Redis位置缓存
 - 断线重连处理
 
+### 3.3 对战系统
+- 集成 Pokemon Showdown
+  - WebSocket 连接管理
+  - 消息格式转换
+  - 状态同步
+- 对战功能
+  - 匹配对战
+  - 指定对手对战
+  - 多种对战格式
+- 对战数据
+  - 宝可梦配置
+  - 技能系统
+  - 状态效果
+- 断线重连
+  - 对战状态保持
+  - 自动重连机制
+  - 超时处理
+
 ## 4. 关键配置
 
 ### appsettings.json
@@ -65,6 +90,11 @@ src/
   "Server": {
     "Port": 5000,
     "ViewDistance": 15
+  },
+  "ShowdownServer": {
+    "Url": "ws://localhost:8000/showdown/websocket",
+    "ReconnectInterval": 5000,
+    "HeartbeatInterval": 30000
   },
   "Redis": {
     "ConnectionString": "localhost:6379"
@@ -118,6 +148,20 @@ src/
 4. 接收位置广播
 5. 断开时清理数据
 
+### 5.3 对战流程
+1. 发起对战
+   - 发送对战请求
+   - 等待对手匹配/接受
+   - 初始化对战房间
+2. 对战进行
+   - 选择行动
+   - 执行行动
+   - 状态更新
+3. 对战结束
+   - 结算结果
+   - 清理资源
+   - 更新战绩
+
 ## 6. 安全机制
 
 ### 6.1 认证安全
@@ -143,6 +187,12 @@ src/
 - 消息频率限制
 - 异常行为检测
 
+### 6.3 对战安全
+- 行动合法性验证
+- 超时控制
+- 断线保护
+- 作弊检测
+
 ## 7. 调试指南
 
 ### 7.1 服务端调试
@@ -157,6 +207,12 @@ src/
 - Redis性能
 - 内存使用情况
 
+### 7.3 对战调试
+- 对战日志查看
+- WebSocket连接状态
+- 消息转换验证
+- 状态同步检查
+
 ## 8. 部署说明
 
 ### 8.1 环境要求
@@ -164,6 +220,7 @@ src/
 - Redis 6.0+
 - PostgreSQL 14+
 - SMTP邮件服务
+- Pokemon Showdown 服务器
 - SSL证书（推荐）
 
 ### 8.2 部署步骤
@@ -187,3 +244,6 @@ src/
 10. 注意数据安全存储
 11. 定期数据库维护
 12. 监控连接池状态
+13. 监控对战服务器状态
+14. 处理对战超时情况
+15. 维护对战房间状态

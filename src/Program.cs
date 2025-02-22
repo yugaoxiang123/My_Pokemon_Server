@@ -104,10 +104,20 @@ public class Program
         );
         
         mapService.SetSessionManager(sessionManager);
-        
+
+        // var showdownService = new ShowdownService(
+        //     context.Configuration["ShowdownServer:Url"] ?? "ws://localhost:8000/showdown/websocket",
+        //     sessionManager
+        // );
         // 3. 注册到容器
         services.AddSingleton(mapService);
         services.AddSingleton(sessionManager);
+        services.AddSingleton(provider => 
+            new ShowdownService(
+                provider.GetRequiredService<IConfiguration>(),
+                provider.GetRequiredService<SessionManager>()
+            )
+        );
         services.AddSingleton<NettyTcpServer>();
 
         // 4. 最后配置认证
@@ -130,6 +140,7 @@ public class Program
                     )
                 };
             });
+
     }
 
     // Redis健康检查服务

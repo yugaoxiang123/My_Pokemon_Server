@@ -23,9 +23,10 @@ public class NettyTcpServer
     private readonly MapService _mapService;
     // 认证服务，处理认证相关逻辑
     private readonly AuthService _authService;
-    
+
+    private readonly ShowdownService _showdownService;
     // 构造函数，注入依赖
-    public NettyTcpServer(SessionManager sessionManager, MapService mapService, AuthService authService)
+    public NettyTcpServer(SessionManager sessionManager, MapService mapService, AuthService authService, ShowdownService showdownService)
     {
         _sessionManager = sessionManager;
         // 创建一个单线程的主线程组
@@ -34,6 +35,7 @@ public class NettyTcpServer
         _workerGroup = new MultithreadEventLoopGroup();
         _mapService = mapService;
         _authService = authService;
+        _showdownService = showdownService;
     }
 
     // 启动服务器方法
@@ -63,7 +65,7 @@ public class NettyTcpServer
                 pipeline.AddLast(new ProtobufVarint32LengthFieldPrepender()); // 3.添加消息长度
                 pipeline.AddLast(new ProtobufEncoder());                      // 4.编码消息体
                 
-                pipeline.AddLast(new MessageRouter(_sessionManager, _mapService, _authService));
+                pipeline.AddLast(new MessageRouter(_sessionManager, _mapService, _authService, _showdownService));
                 pipeline.AddLast(new ServerHandler(_sessionManager, _mapService));
             }));
 
