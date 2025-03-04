@@ -61,7 +61,7 @@ public class NettyTcpServer
                 
                 // 使用统一的消息解码器
                 pipeline.AddLast(new ProtobufDecoder(Message.Parser));  // 2.消息解码
-                
+                // 使用统一的消息编码器是有bug的*******************************
                 pipeline.AddLast(new ProtobufVarint32LengthFieldPrepender()); // 3.添加消息长度
                 pipeline.AddLast(new ProtobufEncoder());                      // 4.编码消息体
                 
